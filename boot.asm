@@ -19,12 +19,12 @@ align 4
                 dd CHECKSUM                     ; and the checksum
 
 section .text
-global _start:function (start_end - _start)
+global _start
 extern kernel_main
-global loop
 _start:
                 mov esp, stack_top
                 call kernel_main
-loop:           nop
-                jmp loop                        ; loop forever
-start_end:
+global halt
+halt:           cli
+.loop:          hlt
+                jmp .loop
