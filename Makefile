@@ -7,11 +7,18 @@ myos.iso: myos.bin
 	cp myos.bin isodir/boot/
 	grub-mkrescue -o myos.iso isodir
 
-myos.bin: boot.o
-	i686-elf-gcc -g -T linker.ld -o myos.bin -ffreestanding -O2 -nostdlib boot.o -lgcc
+myos.bin: boot.o kernel.o asmlib.o
+	i686-elf-gcc -g -T linker.ld -o myos.bin -ffreestanding -O2 -nostdlib boot.o kernel.o asmlib.o -lgcc
 
 boot.o: boot.asm
 	nasm -g -f elf32 boot.asm -o boot.o
+
+kernel.o: kernel.c
+	i686-elf-gcc -g -c kernel.c	-o kernel.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+
+asmlib.o: asmlib.asm
+	nasm -g -f elf32 asmlib.asm -o asmlib.o
+
 
 
 

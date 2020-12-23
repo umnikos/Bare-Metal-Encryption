@@ -1,4 +1,4 @@
-boot.o
-myos.bin
+*.o
+*.bin
 isodir
-myos.iso
+*.iso

@@ -20,9 +20,11 @@ align 4
 
 section .text
 global _start:function (start_end - _start)
-global loop:
+extern kernel_main
+global loop
 _start:
-                mov eax, 0xCAFEBABE
+                mov esp, stack_top
+                call kernel_main
 loop:           nop
                 jmp loop                        ; loop forever
 start_end:
