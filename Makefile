@@ -23,7 +23,9 @@ asmlib.o: asmlib.asm
 
 
 run: myos.iso
-	qemu-system-i386 -s -S -cdrom myos.iso &
+	# qemu-system-i386 -s -S -cdrom myos.iso &
+	qemu-system-i386 -s -S -device virtio-serial -chardev socket,path=/tmp/foo,server,nowait,id=foo -device virtserialport,chardev=foo,name=org.fedoraproject.port.0 -cdrom myos.iso &
+
 	# could not get radare2 to break at a breakpoint
 	# r2 -b32 -e dbg.hwbp=false -e asm.bits=32 -e bin.baddr=0x00100000 -e dbg.exe.path=myos.bin -d gdb://localhost:1234
 	cat <(echo "target remote localhost:1234") - | gdb myos.bin
@@ -31,7 +33,7 @@ run: myos.iso
 
 clean:
 	if test -d isodir; then rm -r isodir; fi
-	if test -f myos.iso; then rm myos.iso; fi
-	if test -f myos.bin; then rm myos.bin; fi
-	if test -f boot.o; then rm boot.o; fi
+	rm -f *.iso
+	rm -f *.bin
+	rm -f *.o
 
