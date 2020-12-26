@@ -129,6 +129,8 @@ void virtio_init(struct search_result res) {
   out_byte(iobase+0x12, status);
   if ((in_byte(iobase+0x12) & VIRTIO_FEATURES_OK) == 0) {
     // the negotiations have failed!
+    status |= VIRTIO_FAILED;
+    out_byte(iobase+0x12, status);
     mov_to_eax(0xBABADEAD);
     halt();
   }
@@ -145,7 +147,7 @@ void virtio_negotiate(uint32_t* supported_features) {
    * supported_features = 79000006
    * 0111 1001 0000 0000 0000 0000 0000 0110
    */
-  // TODO
+  *supported_features &= 0xFF000000;
 }
 
 void virtio_queues() {
