@@ -2,11 +2,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-void mov_to_eax(uint32_t val);
-void out_byte(uint16_t port, uint8_t data);
-void out_dword(uint16_t port, uint32_t data);
-uint8_t in_byte(uint16_t port);
-uint32_t in_dword(uint16_t port);
+extern void mov_to_eax(uint32_t val);
+extern void out_byte(uint16_t port, uint8_t data);
+extern void out_dword(uint16_t port, uint32_t data);
+extern uint8_t in_byte(uint16_t port);
+extern uint32_t in_dword(uint16_t port);
 
 struct search_result {
   uint32_t bus;
@@ -25,6 +25,7 @@ void virtio_init(struct search_result res);
 struct search_result pci_find_virtio();
 void virtio_negotiate(uint32_t* supported_features);
 void virtio_queues();
+uint8_t* gimme_memory(uint32_t pages);
 
 void kernel_main() {
   //mov_to_eax(0xCAFEBABE);
@@ -83,7 +84,7 @@ struct search_result pci_find_virtio() {
       // but I don't know what the subsystem number of virtio-serial is
       // (it happens to be 3)
       if (deviceid >= 0x1000 &&
-          deviceid <= 0x103F &&
+          deviceid <= 0x103F && // search only for transitional virtio devices
           pci_read_vendor(bus,device) == 0x1AF4) {
         result.bus = bus;
         result.device = device;
@@ -105,6 +106,9 @@ struct search_result pci_find_virtio() {
 
 void virtio_init(struct search_result res) {
   // http://www.dumais.io/index.php?article=aca38a9a2b065b24dfa1dee728062a12
+  // iobase offsets are from virtio spec 4, section 4.1.4.8
+  // http://docs.oasis-open.org/virtio/virtio/v1.0/virtio-v1.0.pdf
+
   uint32_t bus = res.bus;
   uint32_t device = res.device;
   //uint16_t irq = pci_read_irq(bus, device);
@@ -137,9 +141,6 @@ void virtio_init(struct search_result res) {
   virtio_queues();
   status |= VIRTIO_DRIVER_OK;
   out_byte(iobase+0x12, status);
-
-  mov_to_eax(in_byte(iobase+0x12));
-  halt();
 }
 
 void virtio_negotiate(uint32_t* supported_features) {
@@ -150,6 +151,40 @@ void virtio_negotiate(uint32_t* supported_features) {
   *supported_features &= 0xFF000000;
 }
 
+// section 4.1.5.1.3.1 tells us these need to be at a 4K boundary (X<<12)
+uint8_t* input_queue;
+uint8_t* output_queue;
+
 void virtio_queues() {
-  // TODO
+  // section 5.3.2 tells us what the two queues are
+  // only queue #1 is needed for output
+  uint32_t q_addr = 1;
+
+  // grab queue size
+
+  uint8_t* test = gimme_memory(15);
+  test = gimme_memory(8);
+  mov_to_eax(test);
+
+  halt();
+}
+
+// not actually functions!
+extern void heap_size();
+extern void heap_start();
+extern void heap_end();
+
+uint32_t given_pages = 0;
+uint8_t* gimme_memory(uint32_t pages) {
+  if ((uint32_t)heap_start & 0x00000FFF) { // this check isn't necessary, it's here for my own sanity
+    mov_to_eax(0xBAADF00D);
+    halt();
+  }
+  if (pages + given_pages > (uint32_t)heap_size) {
+    mov_to_eax(0x8BADF00D);
+    halt();
+  }
+  uint8_t* res = (uint8_t*)((uint32_t)heap_start + (given_pages<<12));
+  given_pages += pages;
+  return res;
 }
