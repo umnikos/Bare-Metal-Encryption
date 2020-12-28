@@ -70,7 +70,8 @@ _start:
 
                 call init_gdt
 
-                sti                             ; enable interrupts again
+; commented out because I don't have an IDT setup yet so the CPU triple-faults
+;               sti                             ; enable interrupts again
                 call kernel_main
 global halt
 halt:           cli
@@ -87,3 +88,8 @@ heap_size:      equ 32
 heap_start:
                 resb 4096*heap_size
 heap_end:
+
+global waiting
+waiting:
+                jmp $
+                ret
