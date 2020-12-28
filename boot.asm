@@ -76,10 +76,22 @@ init_idt:
                 call fill_idt                   ; too complicated to do in assembly
                 lidt [idtr]
 
-global set_interrupt_handler
-set_interrupt_handler:
-                ; TODO
+global disable_interrupts
+disable_interrupts:
+                cli
                 ret
+global enable_interrupts
+enable_interrupts:
+                sti
+                ret
+
+extern virtio_handler
+global virtio_handler_prelude
+virtio_handler_prelude:
+                pusha
+                call virtio_handler
+                popa
+                iret
 
 ; --- BOOT ---
 

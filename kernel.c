@@ -12,7 +12,10 @@ extern uint16_t in_word(uint16_t port);
 extern uint32_t in_dword(uint16_t port);
 extern void halt();
 extern void waiting();
-extern void set_interrupt_handler(uint8_t irq, void(*handler)());
+extern void disable_interrupts();
+extern void enable_interrupts();
+extern void virtio_handler_prelude();
+void set_irq(uint8_t irq);
 
 struct search_result {
   uint32_t bus;
@@ -119,9 +122,6 @@ void virtio_init(struct search_result res) {
   // iobase offsets are from virtio spec 4, section 4.1.4.8
   // http://docs.oasis-open.org/virtio/virtio/v1.0/virtio-v1.0.pdf
 
-  //uint16_t irq = pci_read_irq(bus, device);
-  //setup_irq(irq); // I'm pretty sure this is only necessary for input
-
   /* from testing:
    * bar0 = c041
    * 1100 0000 0100 0001
@@ -130,7 +130,7 @@ void virtio_init(struct search_result res) {
    * 0001 0000 0000 0000
    */
   uint8_t irq = pci_read_irq(res.bus, res.device);
-  set_interrupt_handler(irq, &virtio_handler);
+  set_irq(irq);
   uint16_t iobase = res.iobase;
   uint8_t status = VIRTIO_ACKNOWLEDGE;
   out_byte(iobase+0x12, status);
@@ -294,4 +294,11 @@ void fill_idt() {
 
 void virtio_handler() {
   crash(0xBABABABA);
+}
+
+void set_irq(uint8_t irq) {
+  disable_interrupts();
+  idt[irq].offset_1 = (uint32_t)virtio_handler_prelude & 0xFFFF;
+  idt[irq].offset_2 = ((uint32_t)virtio_handler_prelude & 0xFFFF0000) >> 16;
+  enable_interrupts();
 }
