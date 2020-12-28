@@ -12,6 +12,7 @@ extern uint16_t in_word(uint16_t port);
 extern uint32_t in_dword(uint16_t port);
 extern void halt();
 extern void waiting();
+extern void set_interrupt_handler(uint8_t irq, void(*handler)());
 
 struct search_result {
   uint32_t bus;
@@ -30,8 +31,11 @@ void virtio_init(struct search_result res);
 struct search_result pci_find_virtio();
 void virtio_negotiate(uint32_t* supported_features);
 void virtio_queues(uint16_t iobase);
-uint8_t* gimme_memory(uint32_t pages);
 void hello_world(struct search_result);
+void virtio_handler();
+
+uint8_t* gimme_memory(uint32_t pages);
+void fill_idt();
 
 #define mem_barrier asm volatile ("" : : : "memory")
 
@@ -125,6 +129,8 @@ void virtio_init(struct search_result res) {
    * bar1 = 1000
    * 0001 0000 0000 0000
    */
+  uint8_t irq = pci_read_irq(res.bus, res.device);
+  set_interrupt_handler(irq, &virtio_handler);
   uint16_t iobase = res.iobase;
   uint8_t status = VIRTIO_ACKNOWLEDGE;
   out_byte(iobase+0x12, status);
@@ -244,4 +250,48 @@ uint8_t* gimme_memory(uint32_t pages) {
   uint8_t* res = (uint8_t*)((uint32_t)heap_start + (given_pages<<12));
   given_pages += pages;
   return res;
+}
+
+// https://wiki.osdev.org/IDT
+struct idt_entry {
+  uint16_t offset_1; // offset bits 0..15
+  uint16_t selector; // code segment selector in GDT
+  uint8_t zero; // full of 0s for legacy reasons
+  uint8_t type_attr; // settings
+  uint16_t offset_2; // offset bits 0..16
+} __attribute__((packed));
+extern struct idt_entry idt[];
+extern void idt_handler1();
+extern void idt_handler2();
+void fill_idt() {
+  // this magic sequence has been provided to us by https://wiki.osdev.org/Interrupts_tutorial
+  out_byte(0x20, 0x11);
+  out_byte(0xA0, 0x11);
+  out_byte(0x21, 0x20);
+  out_byte(0xA1, 40);
+  out_byte(0x21, 0x04);
+  out_byte(0xA1, 0x02);
+  out_byte(0x21, 0x01);
+  out_byte(0xA1, 0x01);
+  out_byte(0x21, 0x0);
+  out_byte(0xA1, 0x0);
+
+  for (uint32_t i=0; i<256; i++) {
+    struct idt_entry ih;
+    if (i < 8) {
+      ih.offset_1 = (uint32_t)idt_handler1 & 0xFFFF;
+      ih.offset_2 = ((uint32_t)idt_handler1 & 0xFFFF0000) >> 16;
+    } else {
+      ih.offset_1 = (uint32_t)idt_handler2 & 0xFFFF;
+      ih.offset_2 = ((uint32_t)idt_handler2 & 0xFFFF0000) >> 16;
+    }
+    ih.zero = 0;
+    ih.selector = 0x08;
+    ih.type_attr = 0x8E;
+    idt[i] = ih;
+  }
+}
+
+void virtio_handler() {
+  crash(0xBABABABA);
 }

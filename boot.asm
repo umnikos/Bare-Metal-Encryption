@@ -6,11 +6,14 @@ FLAGS           equ  MBALIGN | MEMINFO          ; this is the Multiboot 'flag' f
 MAGIC_NUMBER    equ 0x1BADB002                  ; define the magic number constant
 CHECKSUM        equ -(MAGIC_NUMBER + FLAGS)     ; calculate the checksum
                                                 ; (magic number + checksum + flags should equal 0)
+; --- STACK ---
 
 section .bss
 align 16
 stack_bottom:   resb 16384
 stack_top:
+
+; --- GDT ---
 
 section .data
 ; references: https://wiki.osdev.org/GDT_Tutorial and https://wiki.osdev.org/Global_descriptor_table
@@ -42,6 +45,44 @@ gdt:
                 db 0
 gdt_end:
 
+; --- IDT ---
+
+idtr:           dw idt_end-idt-1
+                dd idt
+section .bss
+global idt
+idt:
+                resb 8*256
+idt_end:
+section .text
+global idt_handler1
+global idt_handler2
+idt_handler1:
+                pusha
+                mov ax, 0x20
+                out 0x20, ax
+                popa
+                iret
+idt_handler2:
+                pusha
+                mov ax, 0x20
+                out 0xA0, ax
+                out 0x20, ax
+                popa
+                iret
+
+extern fill_idt
+init_idt:
+                call fill_idt                   ; too complicated to do in assembly
+                lidt [idtr]
+
+global set_interrupt_handler
+set_interrupt_handler:
+                ; TODO
+                ret
+
+; --- BOOT ---
+
 section .multiboot
 align 4
                 dd MAGIC_NUMBER                 ; write the magic number to the machine code,
@@ -70,13 +111,16 @@ _start:
 
                 call init_gdt
 
-; commented out because I don't have an IDT setup yet so the CPU triple-faults
-;               sti                             ; enable interrupts again
+                call init_idt
+
+                sti                             ; enable interrupts again
                 call kernel_main
 global halt
 halt:           cli
 .loop:          hlt
                 jmp .loop
+
+; --- HEAP ---
 
 ; there are cleaner solutions than this, but eh.
 section .heap

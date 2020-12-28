@@ -16,7 +16,7 @@ struct virtq_desc {
   uint32_t len; // data length
   uint16_t flags; // flags described above
   uint16_t next; // descriptor chaining
-};
+} __attribute__((packed));
 
 // avaiable header
 // only written by driver and read by the device
@@ -24,12 +24,12 @@ struct virtq_avail {
   uint16_t flags; // flags
   uint16_t idx; // index of next free slot in ring
   uint16_t ring[]; // list of frames. there is no virtq_avail_elem to hold so it holds heads to descriptor chains
-};
+} __attribute__((packed));
 
 struct virtq_used_elem {
   uint32_t id; // index of start of used descriptor chain. uint32_t for padding reasons
   uint32_t len; // total number of bytes written to buffer
-};
+} __attribute__((packed));
 
 // used header
 // only written by device and read by the driver
@@ -37,13 +37,13 @@ struct virtq_used {
   uint16_t flags; // flags
   uint16_t idx; // index of next free slot in ring
   struct virtq_used_elem ring[]; // list of frames
-};
+} __attribute__((packed));
 
 struct virtq {
   struct virtq_desc *desc; // list of frames holding pointers to memory addresses with data
   struct virtq_avail *avail; // list of free frames for sending new data
   struct virtq_used *used; // list of used frames
   uint16_t qsize;
-};
+} __attribute__((packed));
 
 #endif // VIRTQUEUE_H
