@@ -45,3 +45,5 @@ in_dword:
                 in eax, dx
                 ret
 
+global nothing
+nothing:        ret                             ; for debugging purposes

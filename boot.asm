@@ -59,15 +59,15 @@ global idt_handler1
 global idt_handler2
 idt_handler1:
                 pusha
-                mov ax, 0x20
-                out 0x20, ax
+                mov al, 0x20
+                out 0x20, al
                 popa
                 iret
 idt_handler2:
                 pusha
-                mov ax, 0x20
-                out 0xA0, ax
-                out 0x20, ax
+                mov al, 0x20
+                out 0xA0, al
+                out 0x20, al
                 popa
                 iret
 
@@ -90,6 +90,9 @@ global virtio_handler_prelude
 virtio_handler_prelude:
                 pusha
                 call virtio_handler
+                mov al, 0x20
+                out 0xA0, al
+                out 0x20, al
                 popa
                 iret
 
@@ -117,7 +120,7 @@ init_gdt:
 global _start
 extern kernel_main
 _start:
-                cli                             ; disable interrupts while we're setting up stuff
+                call disable_interrupts         ; disable interrupts while we're setting up stuff
 
                 mov esp, stack_top              ; setup the stack (needed for C)
 
@@ -125,10 +128,10 @@ _start:
 
                 call init_idt
 
-                sti                             ; enable interrupts again
+                call enable_interrupts          ; enable interrupts again
                 call kernel_main
 global halt
-halt:           cli
+halt:           call disable_interrupts
 .loop:          hlt
                 jmp .loop
 

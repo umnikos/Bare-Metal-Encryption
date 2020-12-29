@@ -12,6 +12,7 @@ extern uint16_t in_word(uint16_t port);
 extern uint32_t in_dword(uint16_t port);
 extern void halt();
 extern void waiting();
+extern void nothing();
 extern void disable_interrupts();
 extern void enable_interrupts();
 extern void virtio_handler_prelude();
@@ -40,7 +41,7 @@ void virtio_handler();
 uint8_t* gimme_memory(uint32_t pages);
 void fill_idt();
 
-#define mem_barrier asm volatile ("" : : : "memory")
+#define mem_barrier __sync_synchronize()
 
 void kernel_main() {
   struct search_result virtio = pci_find_virtio();
@@ -220,14 +221,21 @@ void hello_world(struct search_result virtio) {
   output_queue.desc[buf_index].flags = 0;
 
   // add it in the available ring
+  nothing();
   uint16_t index = output_queue.avail->idx % output_queue.qsize;
+  nothing();
   output_queue.avail->ring[index] = buf_index;
+  nothing();
   mem_barrier; // section 3.2.1.3.1
+  nothing();
   output_queue.avail->idx++;
+  nothing();
   mem_barrier; // section 3.2.1.4.1
+  nothing();
 
   // notify the device that there's been a change
   out_word(iobase+0x10,1);
+  nothing();
 
   // must not return or the stack will get destroyed
   while (1);
@@ -265,6 +273,7 @@ extern void idt_handler1();
 extern void idt_handler2();
 void fill_idt() {
   // this magic sequence has been provided to us by https://wiki.osdev.org/Interrupts_tutorial
+  /*
   out_byte(0x20, 0x11);
   out_byte(0xA0, 0x11);
   out_byte(0x21, 0x20);
@@ -275,6 +284,7 @@ void fill_idt() {
   out_byte(0xA1, 0x01);
   out_byte(0x21, 0x0);
   out_byte(0xA1, 0x0);
+  */
 
   for (uint32_t i=0; i<256; i++) {
     struct idt_entry ih;
