@@ -278,16 +278,17 @@ void fill_idt() {
   // 0x21 = master data
   // 0xA0 = slave command
   // 0xA1 = slave data
-  out_byte(0x20, 0x11);
+  out_byte(0x20, 0x11); // start initialization sequence
   out_byte(0xA0, 0x11);
-  out_byte(0x21, 0x20);
-  out_byte(0xA1, 40);
-  out_byte(0x21, 0x04);
-  out_byte(0xA1, 0x02);
-  out_byte(0x21, 0x01);
+
+  out_byte(0x21, 0x20); // master PIC offset 0x20
+  out_byte(0xA1, 0x28); // slave PIC offset 0x28 (0x20+8)
+  out_byte(0x21, 0x04); // tell master to cascane to slave through IRQ2
+  out_byte(0xA1, 0x02); // tell slave its cascade identity
+  out_byte(0x21, 0x01); // 8086 mode
   out_byte(0xA1, 0x01);
-  out_byte(0x21, 0x0);
-  out_byte(0xA1, 0x0);
+  out_byte(0x21, 0); // set masks to 0 (all interrupts enabled)
+  out_byte(0xA1, 0);
 
   for (uint32_t i=0; i<256; i++) {
     struct idt_entry ih;
