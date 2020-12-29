@@ -131,7 +131,7 @@ void virtio_init(struct search_result res) {
    * 0001 0000 0000 0000
    */
   uint8_t irq = pci_read_irq(res.bus, res.device);
-  set_irq(irq);
+  set_irq(0x20+irq);
   uint16_t iobase = res.iobase;
   uint8_t status = VIRTIO_ACKNOWLEDGE;
   out_byte(iobase+0x12, status);
@@ -272,8 +272,12 @@ extern struct idt_entry idt[];
 extern void idt_handler1();
 extern void idt_handler2();
 void fill_idt() {
-  // this magic sequence has been provided to us by https://wiki.osdev.org/Interrupts_tutorial
-  /*
+  // https://wiki.osdev.org/8259_PIC
+  //
+  // 0x20 = master command
+  // 0x21 = master data
+  // 0xA0 = slave command
+  // 0xA1 = slave data
   out_byte(0x20, 0x11);
   out_byte(0xA0, 0x11);
   out_byte(0x21, 0x20);
@@ -284,7 +288,6 @@ void fill_idt() {
   out_byte(0xA1, 0x01);
   out_byte(0x21, 0x0);
   out_byte(0xA1, 0x0);
-  */
 
   for (uint32_t i=0; i<256; i++) {
     struct idt_entry ih;
