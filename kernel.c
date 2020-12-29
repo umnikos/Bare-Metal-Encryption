@@ -23,6 +23,7 @@ struct search_result {
   uint32_t device;
   uint16_t iobase;
 };
+struct search_result res;
 void serial_print(char* str); // TODO
 uint16_t pci_read_config(uint32_t bus, uint32_t device, uint32_t func, uint32_t offset);
 uint16_t pci_read_headertype(uint32_t bus, uint32_t device);
@@ -37,6 +38,7 @@ void virtio_negotiate(uint32_t* supported_features);
 void virtio_queues(uint16_t iobase);
 void hello_world(struct search_result);
 void virtio_handler();
+volatile uint8_t virtqueue_setup = 0;
 
 uint8_t* gimme_memory(uint32_t pages);
 void fill_idt();
@@ -45,6 +47,7 @@ void fill_idt();
 
 void kernel_main() {
   struct search_result virtio = pci_find_virtio();
+  res = virtio;
   virtio_init(virtio);
   hello_world(virtio);
   crash(0x42424242);
@@ -221,21 +224,15 @@ void hello_world(struct search_result virtio) {
   output_queue.desc[buf_index].flags = 0;
 
   // add it in the available ring
-  nothing();
   uint16_t index = output_queue.avail->idx % output_queue.qsize;
-  nothing();
   output_queue.avail->ring[index] = buf_index;
-  nothing();
   mem_barrier; // section 3.2.1.3.1
-  nothing();
   output_queue.avail->idx++;
-  nothing();
+  virtqueue_setup = 1;
   mem_barrier; // section 3.2.1.4.1
-  nothing();
 
   // notify the device that there's been a change
   out_word(iobase+0x10,1);
-  nothing();
 
   // must not return or the stack will get destroyed
   while (1);
@@ -307,7 +304,11 @@ void fill_idt() {
 }
 
 void virtio_handler() {
-  crash(0xBABABABA);
+  in_byte(res.iobase+0x12);
+  if (virtqueue_setup) {
+    crash(0xBABABABA);
+  }
+  nothing();
 }
 
 void set_irq(uint8_t irq) {
