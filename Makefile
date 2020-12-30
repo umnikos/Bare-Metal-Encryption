@@ -16,8 +16,9 @@ myos.iso: myos.bin
 
 asmfiles = $(subst .asm,.asm.o,$(wildcard *.asm))
 cfiles = $(subst .c,.c.o,$(wildcard *.c))
+hfiles = $(wildcard *.h)
 
-myos.bin: $(asmfiles) $(cfiles)
+myos.bin: $(asmfiles) $(cfiles) $(hfiles)
 	$(CC) -g -T linker.ld -o myos.bin -ffreestanding -O2 -nostdlib *.o -lgcc
 %.asm.o: %.asm
 	$(ASSEMBLE) $< -o $@
