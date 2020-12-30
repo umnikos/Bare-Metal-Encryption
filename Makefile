@@ -1,5 +1,12 @@
 SHELL := /bin/bash
 
+CC = i686-elf-gcc
+AS = nasm
+COMPILE = $(CC) -g -std=gnu99 -ffreestanding -O2 -Wall -Wextra -c
+ASSEMBLE = $(AS) -g -f elf32
+
+all: clean myos.iso
+
 myos.iso: myos.bin
 	if test -d isodir; then rm -r isodir; fi
 	mkdir -p isodir/boot/grub
@@ -7,18 +14,17 @@ myos.iso: myos.bin
 	cp myos.bin isodir/boot/
 	grub-mkrescue -o myos.iso isodir
 
-myos.bin: boot.o kernel.o asmlib.o
-	i686-elf-gcc -g -T linker.ld -o myos.bin -ffreestanding -O2 -nostdlib boot.o kernel.o asmlib.o -lgcc
+asmfiles = $(subst .asm,.asm.o,$(wildcard *.asm))
+cfiles = $(subst .c,.c.o,$(wildcard *.c))
 
-boot.o: boot.asm
-	nasm -g -f elf32 boot.asm -o boot.o
+myos.bin: $(asmfiles) $(cfiles)
+	$(CC) -g -T linker.ld -o myos.bin -ffreestanding -O2 -nostdlib *.o -lgcc
+%.asm.o: %.asm
+	$(ASSEMBLE) $< -o $@
+%.c.o: %.c
+	$(COMPILE) $< -o $@
 
-kernel.o: kernel.c
-	i686-elf-gcc -g -c kernel.c	-o kernel.o -std=gnu99 -ffreestanding -O2 -Wall -Wextra
-
-asmlib.o: asmlib.asm
-	nasm -g -f elf32 asmlib.asm -o asmlib.o
-
+%.asm:; # silence gnu-make implicit rule and prevent circular dependency
 
 
 
@@ -32,6 +38,7 @@ run: myos.iso
 
 debug: run
 	cat <(echo -e "target remote localhost:1234") - | gdb myos.bin
+
 
 
 clean:
