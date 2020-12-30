@@ -1,5 +1,5 @@
 ; there are cleaner solutions than this, but eh.
-section .heap
+section .bss
 align 4096
 global heap_start
 global heap_end
@@ -9,6 +9,7 @@ heap_start:
                 resb 4096*heap_size
 heap_end:
 
+section .text
 global waiting
 waiting:
                 jmp $
