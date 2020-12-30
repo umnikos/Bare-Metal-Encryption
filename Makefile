@@ -2,8 +2,8 @@ SHELL := /bin/bash
 
 CC = i686-elf-gcc
 AS = nasm
-COMPILE = $(CC) -g -std=gnu99 -ffreestanding -O2 -Wall -Wextra -c
-ASSEMBLE = $(AS) -g -f elf32
+COMPILE = $(CC) -g -std=gnu99 -ffreestanding -O2 -Wall -Wextra -Werror -c
+ASSEMBLE = $(AS) -g -f elf32 -Wall -Werror
 
 all: clean myos.iso
 
@@ -29,16 +29,21 @@ myos.bin: $(asmfiles) $(cfiles) $(hfiles)
 
 
 
+qemu = qemu-system-i386 -d cpu_reset -D ./qemu.log -s -device virtio-serial -chardev socket,path=/tmp/foo,server,nowait,id=foo -device virtserialport,chardev=foo,name=org.fedoraproject.port.0 -cdrom myos.iso
+socat = socat /tmp/foo -
+# could not get radare2 to break at a breakpoint
+# r2 -b32 -e dbg.hwbp=false -e asm.bits=32 -e bin.baddr=0x00100000 -e dbg.exe.path=myos.bin -d gdb://localhost:1234
+debugger = cat <(echo -e "target remote localhost:1234") - | gdb myos.bin
 run: myos.iso
-	# qemu-system-i386 -s -S -cdrom myos.iso &
-	qemu-system-i386 -d cpu_reset -D ./qemu.log -s -device virtio-serial -chardev socket,path=/tmp/foo,server,nowait,id=foo -device virtserialport,chardev=foo,name=org.fedoraproject.port.0 -cdrom myos.iso &
-	socat /tmp/foo - &
+	$(qemu) &
+	sleep 1
+	$(socat)
 
-	# could not get radare2 to break at a breakpoint
-	# r2 -b32 -e dbg.hwbp=false -e asm.bits=32 -e bin.baddr=0x00100000 -e dbg.exe.path=myos.bin -d gdb://localhost:1234
-
-debug: run
-	cat <(echo -e "target remote localhost:1234") - | gdb myos.bin
+debug: myos.iso
+	$(qemu) &
+	sleep 1
+	$(socat) &
+	$(debugger)
 
 
 
