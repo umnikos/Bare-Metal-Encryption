@@ -1,5 +1,4 @@
-#ifndef VIRTQUEUE_H
-#define VIRTQUEUE_H
+#pragma once
 
 // taken from appendix A in the specification: http://docs.oasis-open.org/virtio/virtio/v1.0/virtio-v1.0.pdf
 #include <stdint.h>
@@ -46,4 +45,3 @@ struct virtq {
   uint16_t qsize;
 } __attribute__((packed));
 
-#endif // VIRTQUEUE_H

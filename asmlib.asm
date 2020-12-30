@@ -4,6 +4,9 @@ global crash                                    ; mov_to_eax(uint32_t val)
 crash:          mov eax, dword [esp+4]
                 jmp halt
 
+global nothing
+nothing:        ret                             ; for debugging purposes
+
 global out_byte                                 ; out_byte(uint16_t port, uint8_t data)
 out_byte:
                 mov dx, word [esp+4]
@@ -45,5 +48,3 @@ in_dword:
                 in eax, dx
                 ret
 
-global nothing
-nothing:        ret                             ; for debugging purposes
