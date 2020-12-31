@@ -2,10 +2,8 @@
 #include "virtio.h"
 
 extern u8* gimme_memory(u32 pages);
-extern void disable_interrupts();
-extern void enable_interrupts();
 extern void virtio_handler_prelude();
-void set_irq(u8 irq);
+extern void set_irq(u8 irq);
 
 struct virtio_device res;
 
@@ -22,6 +20,7 @@ struct virtio_device pci_find_virtio();
 void virtio_negotiate(u32* supported_features);
 void virtio_queues(struct virtio_device* virtio);
 void virtio_handler();
+
 volatile u8 virtqueue_setup = 0;
 
 #define config_address  0x0CF8
