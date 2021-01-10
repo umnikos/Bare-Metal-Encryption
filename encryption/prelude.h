@@ -1,6 +1,13 @@
 #pragma once
 #include <stdint.h>
 
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "../tiny-bignum-c/bn.h"
+#include "../tiny-bignum-c/bn.c"
+#define ii struct bn
+
 #define max(a,b) ((a > b) ? a : b)
 #define min(a,b) ((a < b) ? a : b)
 
