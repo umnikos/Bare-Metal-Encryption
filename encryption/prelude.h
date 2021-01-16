@@ -7,6 +7,7 @@
 #include "../tiny-bignum-c/bn.h"
 #define ii struct bn
 #define II_BITCOUNT BN_ARRAY_SIZE*WORD_SIZE
+#define mkii(V) ii V##_var; ii* V = & V##_var
 
 #define max(a,b) ((a > b) ? a : b)
 #define min(a,b) ((a < b) ? a : b)
@@ -19,4 +20,4 @@
 void exponentiation(ii* b, ii* e, ii* res);
 void modular_exponentiation(ii* b, ii* e, ii* m, ii* res);
 void gcd(ii* a, ii* b, ii* res);
-
+void lcm(ii* a, ii* b, ii* res);

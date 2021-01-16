@@ -8,7 +8,8 @@ int main() {
   ii c;
   //exponentiation(&a, &b, &c);
   //modular_exponentiation(&a, &b, &m, &c);
-  gcd(&a, &b, &c);
+  //gcd(&a, &b, &c);
+  lcm(&a, &b, &c);
   char buf[256];
   bignum_to_string(&c, buf, sizeof(buf));
   printf("%s\n", buf);
