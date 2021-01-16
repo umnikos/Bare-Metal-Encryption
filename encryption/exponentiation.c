@@ -2,22 +2,30 @@
 
 // https://cp-algorithms.com/algebra/binary-exp.html
 void exponentiation(ii* b, ii* e, ii* res) {
-  bignum_from_int(res, 1);
-  ii one;
-  bignum_from_int(&one, 1);
-  ii temp;
+  ii temp_var; ii* temp = &temp_var;
+  ii one; bignum_from_int(&one, 1);
+
+  bignum_from_int(res, 1); // res = 1
   while (!bignum_is_zero(e)) {
     if (e->array[0]&1) { // if (e & 1) {
-      bignum_mul(res, b, &temp); // res *= b
-      bignum_assign(res, &temp);
+      bignum_mul(res, b, temp); bignum_assign(res, temp); // res *= b
     }
-    bignum_mul(b, b, &temp); // b *= b
-    bignum_assign(b, &temp);
-    bignum_rshift(e, &temp, 1); // e = e >> 1
-    bignum_assign(e, &temp);
+    bignum_mul(b, b, temp); bignum_assign(b, temp); // b *= b
+    bignum_rshift(e, temp, 1); bignum_assign(e, temp); // e = e >> 1
   }
 }
 
 void modular_exponentiation(ii* b, ii* e, ii* m, ii* res) {
-  // TODO
+  ii temp_var; ii* temp = &temp_var;
+  ii one; bignum_from_int(&one, 1);
+
+  bignum_mod(b, m, temp); bignum_assign(b, temp); // b %= m
+  bignum_from_int(res, 1); // res = 1
+  while (!bignum_is_zero(e)) {
+    if (e->array[0]&1) { // if (e & 1) {
+      bignum_mul(res, b, temp); bignum_mod(temp, m, res); // res = (res * b) % m
+    }
+    bignum_mul(b, b, temp); bignum_mod(temp, m, b); // b = (b * b) % m
+    bignum_rshift(e, temp, 1); bignum_assign(e, temp); // e = e >> 1
+  }
 }
