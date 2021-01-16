@@ -1,2 +1,2 @@
-a.out: *.c
-	gcc *.c ../tiny-bignum-c/bn.c
+a.out: *.c *.h
+	gcc -Wall -g *.c ../tiny-bignum-c/bn.c

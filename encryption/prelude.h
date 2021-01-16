@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define WORD_SIZE 4
 #include "../tiny-bignum-c/bn.h"
 #define ii struct bn
 #define II_BITCOUNT BN_ARRAY_SIZE*WORD_SIZE
@@ -17,7 +18,11 @@
 #define true 1
 #define false 0
 
+void print_bignum(ii* n);
 void exponentiation(ii* b, ii* e, ii* res);
 void modular_exponentiation(ii* b, ii* e, ii* m, ii* res);
 void gcd(ii* a, ii* b, ii* res);
 void lcm(ii* a, ii* b, ii* res);
+void init_rng();
+i rng();
+
