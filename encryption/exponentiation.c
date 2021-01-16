@@ -1,7 +1,10 @@
 #include "prelude.h"
 
 // https://cp-algorithms.com/algebra/binary-exp.html
-void exponentiation(ii* b, ii* e, ii* res) {
+void exponentiation(ii* b_in, ii* e_in, ii* res) {
+  ii b_var; ii* b = &b_var; bignum_assign(b, b_in);
+  ii e_var; ii* e = &e_var; bignum_assign(e, e_in);
+
   ii temp_var; ii* temp = &temp_var;
   ii one; bignum_from_int(&one, 1);
 
@@ -15,7 +18,10 @@ void exponentiation(ii* b, ii* e, ii* res) {
   }
 }
 
-void modular_exponentiation(ii* b, ii* e, ii* m, ii* res) {
+void modular_exponentiation(ii* b_in, ii* e_in, ii* m, ii* res) {
+  ii b_var; ii* b = &b_var; bignum_assign(b, b_in);
+  ii e_var; ii* e = &e_var; bignum_assign(e, e_in);
+
   ii temp_var; ii* temp = &temp_var;
   ii one; bignum_from_int(&one, 1);
 
