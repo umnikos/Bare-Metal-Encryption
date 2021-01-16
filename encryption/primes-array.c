@@ -3,7 +3,7 @@
 i* primes = NULL;
 i primes_count = 0;
 
-static inline byte isPrimeTrial(i n) {
+static inline byte is_prime_trial(i n) {
   for (i j=1 ; ; ++j) {
     if (n % primes[j] == 0) {
       return false;
@@ -14,7 +14,7 @@ static inline byte isPrimeTrial(i n) {
   }
 }
 
-void generatePrimesArray(i count) {
+void generate_primes_array(i count) {
   if (count <= primes_count) return;
   if (count < 5) count = 5;
   primes = realloc(primes, sizeof(i) * count);
@@ -23,7 +23,7 @@ void generatePrimesArray(i count) {
   primes_count = max(primes_count, 2);
   i n = primes[primes_count-1]+2;
   for (; primes_count<count; ++n, ++n) {
-    if (isPrimeTrial(n)) {
+    if (is_prime_trial(n)) {
       primes[primes_count] = n;
       ++primes_count;
     }

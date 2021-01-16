@@ -5,8 +5,8 @@
 #include <stdio.h>
 
 #include "../tiny-bignum-c/bn.h"
-#include "../tiny-bignum-c/bn.c"
 #define ii struct bn
+#define II_BITCOUNT BN_ARRAY_SIZE*WORD_SIZE
 
 #define max(a,b) ((a > b) ? a : b)
 #define min(a,b) ((a < b) ? a : b)
