@@ -2,10 +2,10 @@
 
 // https://cp-algorithms.com/algebra/binary-exp.html
 void exponentiation(ii* b_in, ii* e_in, ii* res) {
-  ii b_var; ii* b = &b_var; bignum_assign(b, b_in);
-  ii e_var; ii* e = &e_var; bignum_assign(e, e_in);
+  inii(b);
+  inii(e);
 
-  ii temp_var; ii* temp = &temp_var;
+  mkii(temp);
   ii one; bignum_from_int(&one, 1);
 
   bignum_from_int(res, 1); // res = 1
@@ -19,10 +19,10 @@ void exponentiation(ii* b_in, ii* e_in, ii* res) {
 }
 
 void modular_exponentiation(ii* b_in, ii* e_in, ii* m, ii* res) {
-  ii b_var; ii* b = &b_var; bignum_assign(b, b_in);
-  ii e_var; ii* e = &e_var; bignum_assign(e, e_in);
+  inii(b);
+  inii(e);
 
-  ii temp_var; ii* temp = &temp_var;
+  mkii(temp);
   ii one; bignum_from_int(&one, 1);
 
   bignum_mod(b, m, temp); bignum_assign(b, temp); // b %= m

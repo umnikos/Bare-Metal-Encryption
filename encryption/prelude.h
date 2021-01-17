@@ -9,6 +9,7 @@
 #define ii struct bn
 #define II_BITCOUNT BN_ARRAY_SIZE*WORD_SIZE
 #define mkii(V) ii V##_var; ii* V = & V##_var
+#define inii(V) mkii(V); bignum_assign(V, V##_in);
 
 #define max(a,b) ((a > b) ? a : b)
 #define min(a,b) ((a < b) ? a : b)
@@ -25,4 +26,4 @@ void gcd(ii* a, ii* b, ii* res);
 void lcm(ii* a, ii* b, ii* res);
 void init_rng();
 i rng();
-
+void generate_prime_fermat(ii* res);
