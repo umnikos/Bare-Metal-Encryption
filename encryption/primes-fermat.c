@@ -23,9 +23,16 @@ byte is_prime_fermat(ii* p) {
 
 void generate_prime_fermat(ii* res) {
   do {
+    mkii(temp1);
+    mkii(temp2);
+    bignum_init(res);
+    for (i j=0; j<3; j++) {
+      bignum_lshift(res, temp1, 32);
+      bignum_from_int(temp2, rng());
+      bignum_or(temp1, temp2, res);
+    }
     printf(".");
     fflush(stdout);
-    bignum_from_int(res, rng());
   } while (!is_prime_fermat(res));
 }
 

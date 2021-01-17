@@ -4,3 +4,4 @@ isodir
 *.iso
 *.log
 *.out
+*.data

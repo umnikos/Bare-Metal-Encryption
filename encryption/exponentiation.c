@@ -18,6 +18,7 @@ void exponentiation(ii* b_in, ii* e_in, ii* res) {
   }
 }
 
+// https://en.wikipedia.org/wiki/Modular_exponentiation#Pseudocode
 void modular_exponentiation(ii* b_in, ii* e_in, ii* m, ii* res) {
   inii(b);
   inii(e);
