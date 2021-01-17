@@ -23,6 +23,8 @@ byte is_prime_fermat(ii* p) {
 
 void generate_prime_fermat(ii* res) {
   do {
+    printf(".");
+    fflush(stdout);
     bignum_from_int(res, rng());
   } while (!is_prime_fermat(res));
 }
