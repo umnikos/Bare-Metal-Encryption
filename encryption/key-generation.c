@@ -2,7 +2,6 @@
 
 void generate_keys(ii* n, ii* e, ii* d) {
   mkii(temp1);
-  mkii(temp2);
   mkii(p);
   mkii(q);
   generate_prime_fermat(5, p);
@@ -21,33 +20,48 @@ void generate_keys(ii* n, ii* e, ii* d) {
   bignum_mul(p,q,phi_n);
 
   bignum_from_int(e, 65535); // 65537
-  printf("picking e...\n");
+  si x; // to be used while calculating k
   do {
     bignum_inc(e);
     bignum_inc(e);
-    gcd(e, phi_n, temp1);
+    x = gcd_extended(phi_n, e, temp1);
     bignum_dec(temp1);
   } while (!bignum_is_zero(temp1));
   printf("e: ");
   print_bignum(e);
-
-  mkii(k);
-  bignum_init(k);
 
   // (ka+1)/b
   // (ka+ax+by)/b
   // (ka+ax)/b + y
   // a(x+k)/b + y
   // a(x+b-x)/b + y
-  // a*b/b + y
-  // k = b-x
-  // TODO - CALCULATE K
-  return;
+  // ab/b + y
+  // ==> k = b-x
+  mkii(k);
+  printf("x: %x\n", x);
+  if (x>=0) {
+    // x is positive
+    bignum_from_int(temp1, x);
+    bignum_sub(e, temp1, k);
+  } else {
+    // x is negative
+    printf("-x: %x\n", -x);
+    bignum_from_int(temp1, -x);
+    bignum_add(e, temp1, k);
+  }
 
   printf("k: ");
   print_bignum(k);
 
   bignum_mul(k, phi_n, temp1);
+  bignum_inc(temp1);
+  // check if k is correct
+  bignum_mod(temp1, e, d);
+  if (bignum_is_zero(d)) {
+    printf("k is correct.\n");
+  } else {
+    printf("INCORRECT K!!!\n");
+  }
   bignum_div(temp1, e, d);
   printf("d: ");
   print_bignum(d);
