@@ -21,12 +21,12 @@ byte is_prime_fermat(ii* p) {
   return true;
 }
 
-void generate_prime_fermat(ii* res) {
+void generate_prime_fermat(i size, ii* res) {
   do {
     mkii(temp1);
     mkii(temp2);
     bignum_init(res);
-    for (i j=0; j<3; j++) {
+    for (i j=0; j<size; j++) {
       bignum_lshift(res, temp1, 32);
       bignum_from_int(temp2, rng());
       bignum_or(temp1, temp2, res);

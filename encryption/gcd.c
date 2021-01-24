@@ -11,6 +11,10 @@ void gcd(ii* a_in, ii* b_in, ii* res) {
   }
 }
 
+void gcd_extended(ii* a_in, ii* b_in, ii* res, ii* x, ii* y) {
+  // TODO
+}
+
 void lcm(ii* a, ii* b, ii* res) {
   mkii(top);
   bignum_mul(a, b, top);

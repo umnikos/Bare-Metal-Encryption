@@ -8,11 +8,8 @@ void print_bignum(ii* num) {
 
 int main() {
   init_rng();
-  mkii(p);
-  while (true) {
-    generate_prime_fermat(p);
-    printf("prime: ");
-    print_bignum(p);
-  }
+  mkii(n);
+  mkii(e);
+  mkii(d);
+  generate_keys(n, e, d);
 }
-

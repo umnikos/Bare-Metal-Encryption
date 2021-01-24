@@ -26,4 +26,5 @@ void gcd(ii* a, ii* b, ii* res);
 void lcm(ii* a, ii* b, ii* res);
 void init_rng();
 i rng();
-void generate_prime_fermat(ii* res);
+void generate_prime_fermat(i size, ii* res);
+void generate_keys(ii* n, ii* e, ii* d);
