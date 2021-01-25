@@ -1,0 +1,101 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc} % specify there may be unicode in .latex file
+\usepackage[bulgarian]{babel} % support for cyrillic
+%\usepackage{lmodern} % different cyrillic glyphs
+%\usepackage{indentfirst} % indent the first line of paragraph
+\usepackage{nameref} % named references to sections
+\usepackage{graphicx} % for including graphics (images)
+\usepackage{geometry} % for changing page dimensions and header space
+
+% shrink page margins
+\addtolength{\oddsidemargin}{-.875in}
+\addtolength{\evensidemargin}{-.875in}
+\addtolength{\textwidth}{1.75in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.75in}
+
+\begin{document}
+
+\fontsize{14pt}{20}\selectfont % change font to 14pt
+
+
+
+% title page
+\thispagestyle{empty} % hide line numbers for this page only
+\begin{center}
+  \textbf{
+    ТЕХНОЛОГИЧНО УЧИЛИЩЕ ЕЛЕКТРОННИ СИСТЕМИ \\
+    към ТЕХНИЧЕСКИ УНИВЕРСИТЕТ - СОФИЯ \\
+  }
+
+  \vspace{70mm}
+  \textbf{\huge ДИПЛОМНА РАБОТА \\ }
+
+  \vspace{20mm}
+  {\Large Тема:
+    Bare-metal application за x86 архитектура \\
+    работещо върху QEMU/KVM hypervisor
+  }
+
+  \vspace{35mm}
+  \begin{tabular}{p{8cm}p{8cm}}
+    \centering
+    Дипломант: \\
+    Алекс Стефанов
+    &
+    \centering
+    Научен ръководител: \\
+    Стоил Стоилов
+  \end{tabular}
+
+  \vfill
+  СОФИЯ \\
+  \hfill \\
+  2 0 2 1 \\
+\end{center}
+\newpage
+
+% blank page
+\thispagestyle{empty}
+\hfill
+\newpage
+
+% example content
+A theorem to be left as an exercise for the reader:
+$$ x = 2k \rightarrow e^{ix\pi} = 1 $$
+\newpage
+
+% test page - 30x60 coverage
+123456789012345678901234567890123456789012345678901234567890 \\
+2\\
+3\\
+4\\
+5\\
+6\\
+7\\
+8\\
+9\\
+10\\
+11\\
+12\\
+13\\
+14\\
+15\\
+16\\
+17\\
+18\\
+19\\
+20\\
+21\\
+22\\
+23\\
+24\\
+25\\
+26\\
+27\\
+28\\
+29\\
+30\\
+\newpage
+
+\end{document}
