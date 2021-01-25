@@ -6,6 +6,7 @@
 \usepackage{nameref} % named references to sections
 \usepackage{graphicx} % for including graphics (images)
 \usepackage{geometry} % for changing page dimensions and header space
+\usepackage{sectsty} % for changing font size only for sections
 
 % shrink page margins
 \addtolength{\oddsidemargin}{-.875in}
@@ -14,10 +15,13 @@
 \addtolength{\topmargin}{-.5in}
 \addtolength{\textheight}{1.75in}
 
+% \section-specific styling
+\sectionfont{\fontsize{22}{25}\selectfont}
+\subsectionfont{\fontsize{18}{20}\selectfont}
+
 \begin{document}
 
 \fontsize{14pt}{20}\selectfont % change font to 14pt
-
 
 
 % title page
@@ -60,42 +64,29 @@
 \hfill
 \newpage
 
-% example content
-A theorem to be left as an exercise for the reader:
-$$ x = 2k \rightarrow e^{ix\pi} = 1 $$
-\newpage
+% introduction (1-2 pages)
+\section*{Въведение}
 
-% test page - 30x60 coverage
-123456789012345678901234567890123456789012345678901234567890 \\
-2\\
-3\\
-4\\
-5\\
-6\\
-7\\
-8\\
-9\\
-10\\
-11\\
-12\\
-13\\
-14\\
-15\\
-16\\
-17\\
-18\\
-19\\
-20\\
-21\\
-22\\
-23\\
-24\\
-25\\
-26\\
-27\\
-28\\
-29\\
-30\\
-\newpage
+% research (8-10 pages)
+\section{Проучване}
+
+% software description (8-10 pages)
+\section{Избор на средства}
+\subsection{Изисквания} % RSA on bare metal
+\subsection{Избор на език за програмиране и библиотеки} % C, tiny-bignum-c
+\subsection{Описание на алгоритъма}
+
+% implementation (10-15 pages)
+\section{Реализация}
+
+% usage manual (6-10 pages)
+\section{Ръководство на потребителя}
+\subsection{Инсталация}
+
+% conclusion (1 page)
+\section*{Заключение}
+
+% citations (unbounded)
+\section*{Библиография}
 
 \end{document}
