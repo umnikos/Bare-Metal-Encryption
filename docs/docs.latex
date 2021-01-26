@@ -72,6 +72,7 @@
 
 % introduction (1-2 pages)
 \section*{Въведение}
+\addcontentsline{toc}{section}{Въведение}
 
 % research (8-10 pages)
 \section{Проучване}
@@ -116,9 +117,15 @@ C е най-популярният и може би най-добрият ези
 
 % conclusion (1 page)
 \section*{Заключение}
+\addcontentsline{toc}{section}{Заключение}
 
 \newpage
 % citations (unbounded)
+\addcontentsline{toc}{section}{Литература}
 \printbibliography
+
+% table of contents
+\addcontentsline{toc}{section}{Съдържание}
+\tableofcontents
 
 \end{document}
