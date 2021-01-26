@@ -2,12 +2,14 @@
 \usepackage[utf8]{inputenc} % specify there may be unicode in .latex file
 \usepackage[bulgarian]{babel} % support for cyrillic
 %\usepackage{lmodern} % different cyrillic glyphs
-%\usepackage{indentfirst} % indent the first line of paragraph
+\usepackage{indentfirst} % indent the first line of paragraph
 \usepackage{nameref} % named references to sections
 \usepackage{graphicx} % for including graphics (images)
 \usepackage{geometry} % for changing page dimensions and header space
 \usepackage{sectsty} % for changing font size only for sections
 \usepackage[backend=bibtex]{biblatex} % for bibliography and citations
+%\usepackage{listings} % for inserting code
+%\usepackage{color} % color for code
 
 \addbibresource{refs} % specify file with references
 
@@ -19,8 +21,9 @@
 \addtolength{\textheight}{1.75in}
 
 % \section-specific styling
-\sectionfont{\fontsize{22}{25}\selectfont}
-\subsectionfont{\fontsize{18}{20}\selectfont}
+\sectionfont{\fontsize{22}{24}\selectfont}
+\subsectionfont{\fontsize{20}{22}\selectfont}
+\subsubsectionfont{\fontsize{18}{20}\selectfont}
 
 \begin{document}
 
@@ -72,17 +75,37 @@
 
 % research (8-10 pages)
 \section{Проучване}
-\subsection{Bare-metal частта}
 %Преди започване на писането на код проучването се състоеше от четене на книгата "The little book about OS development"\parencite{osbook}, което ми предостави обща представа за това как работи един компютър на ниско ниво и кои части от операционната система ще трябва да създам за да мога да направя приложната част от продукта. След това най-полезният ресурс беше "OSDev.org"\parencite{oswiki}, уики за всичко свързано с писането на операционни системи, което предоставя всички нужни детайли за да напиша кода в действителност. Но при създаването на virtio-serial драйвера гледах и официалната документация на virtio\parencite{virtiodocs} и един блог пост обясняващ вече написан virtio мрежови драйвер\parencite{virtioblogpost}.
-
-\subsection{Encryption частта}
 %Избрах да имплементирам RSA криптиране защото е популярен, стар и не толкова сложен алгоритъм за асиметрично криптиране. Общи знания за алгоритъма получих от видео серията "Public Key Cryptography"\parencite{artoftheproblemrsa} от "Art of the Problem". Конкретни детайли намирах в Wikipedia\parencite{wikipedia} защото Wikipedia предоставя много добри и пълни обяснения за каквото и да било свързано с математика.
+\subsection{Начин на работа на x86 компютър}
+\subsubsection{Стъпки при стартиране}
+% bios vs bootloader vs kernel
+При стартирането на компютъра първата програма която се изпълнява е фърмуера му (BIOS/UEFI). Програмата се намира в чип на дъното на машината и има за цел да направи проверка дали всички компоненти работят изправно и след това да прехвърли изпълнението към буутлоъдъра. Това е малка програма чиято роля е да зареди ядрото на операционната система в паметта и да предаде изпълнението на него. Буутлоъдъра използван в този проект е GRUB.
+\subsubsection{Режими на процесора}
+Един 32-битов x86 процесор може да работи в реален режим или в защитен режим. Реалният режим е остатък от 16-битовата ера където имаме 16 бита за адресиране на паметта без сегментация и 20 бита със сегментация и следователно имаме достъп само до 1MB памет. По исторически причини процесорът винаги стартира в този режим и трябва да бъде превключен в защитен режим, където имаме 32 бита за адресиране и достъп до 4GB памет (без сегментация). GRUB bootloader-а се грижи за тази задача вместо нас.
+\subsection{Видове криптиране}
+Криптирането е процесът на разбъркване на съобщение по такъв начин че дори всеки да го чуе, само човекът към когото е адресирано съобщението да го разбере. Това се постига чрез съществуването на тайна информация която само адресантът има и му позволява да разбере съобщението. Методите за криптиране се делят на два вида: симетрично криптиране и асиметрично криптиране. При симетричното криптиране се използва една и съща тайна информация (т.нар. ключ) за кодиране и декодиране на съобщението. При асиметричното криптиране ключът за криптиране е публичен и всеки може да криптира съобщение, но ключът за декриптиране е различен и само получателя го притежава. При комуникация през интернет обикновено се използва асиметрично криптиране. % TODO - обясни защо
 
 % software description (8-10 pages)
 \section{Избор на средства}
-\subsection{Изисквания} % RSA on bare metal
-\subsection{Избор на език за програмиране и библиотеки} % C, tiny-bignum-c
+\subsection{Изисквания}
+% RSA on bare metal
+% TODO
+\subsection{Избор на език за програмиране и библиотеки} \label{langchoice}
+% C, tiny-bignum-c, GRUB, QEMU
+C е най-популярният и може би най-добрият език за писане на програми на ниско ниво и следователно е очевидният избор за проекта. Използвам чужд буутлоъдър защото няма смисъл да създавам мой и това е извън рамките на изискванията. Буутлоъдъра който избрах е GRUB. За реализацията на криптирането трябват числа по-големи от 32/64 бита, а C не идва с такива и за това се нуждаех от библиотека за големи числа. Повечето библиотеки обаче използват функии от clib които моето ядро не имплементира. Библиотеката на която се спрях е "tiny-bignum-c"\parencite{tinybignumc} защото е малка ($\sim500$ реда код), open-source, с отворен лиценз (Unlicense) и не ползва нищо от clib (включително и {\tt malloc}).
+
 \subsection{Описание на алгоритъма}
+\subsubsection{Първи задачи на ядрото}
+Първото нещо което правим е да създадем стек за да можем да организираме кодът ни като функции и да можем да пишем на език различен от assembly.
+% TODO
+
+\subsubsection{VirtIO драйвер}
+% virtqueues and stuff
+% TODO
+\subsubsection{RSA криптиране в детайли}
+% math & formulas
+% TODO
 
 % implementation (10-15 pages)
 \section{Реализация}
