@@ -1,3 +1,5 @@
 *
 !.gitignore
 !*.latex
+!*.bib
+docs-blx.bib

@@ -7,6 +7,9 @@
 \usepackage{graphicx} % for including graphics (images)
 \usepackage{geometry} % for changing page dimensions and header space
 \usepackage{sectsty} % for changing font size only for sections
+\usepackage[backend=bibtex]{biblatex} % for bibliography and citations
+
+\addbibresource{refs} % specify file with references
 
 % shrink page margins
 \addtolength{\oddsidemargin}{-.875in}
@@ -69,6 +72,11 @@
 
 % research (8-10 pages)
 \section{Проучване}
+\subsection{Bare-metal частта}
+%Преди започване на писането на код проучването се състоеше от четене на книгата "The little book about OS development"\parencite{osbook}, което ми предостави обща представа за това как работи един компютър на ниско ниво и кои части от операционната система ще трябва да създам за да мога да направя приложната част от продукта. След това най-полезният ресурс беше "OSDev.org"\parencite{oswiki}, уики за всичко свързано с писането на операционни системи, което предоставя всички нужни детайли за да напиша кода в действителност. Но при създаването на virtio-serial драйвера гледах и официалната документация на virtio\parencite{virtiodocs} и един блог пост обясняващ вече написан virtio мрежови драйвер\parencite{virtioblogpost}.
+
+\subsection{Encryption частта}
+%Избрах да имплементирам RSA криптиране защото е популярен, стар и не толкова сложен алгоритъм за асиметрично криптиране. Общи знания за алгоритъма получих от видео серията "Public Key Cryptography"\parencite{artoftheproblemrsa} от "Art of the Problem". Конкретни детайли намирах в Wikipedia\parencite{wikipedia} защото Wikipedia предоставя много добри и пълни обяснения за каквото и да било свързано с математика.
 
 % software description (8-10 pages)
 \section{Избор на средства}
@@ -86,7 +94,8 @@
 % conclusion (1 page)
 \section*{Заключение}
 
+\newpage
 % citations (unbounded)
-\section*{Библиография}
+\printbibliography
 
 \end{document}
