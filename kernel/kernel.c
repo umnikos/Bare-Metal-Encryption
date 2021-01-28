@@ -24,20 +24,33 @@ void hello_world(struct virtio_device virtio) {
   // find next free buffer slot
   u16 buf_index = 10; // TODO - actual searching
 
+  debug("hello world started\n");
+
   // set buffer slot's address to message string
   output_queue->desc[buf_index].addr = ((u64)(u32)msg) & 0xFFFFFFFF;
+  debug("hello world address\n");
   output_queue->desc[buf_index].len = msglen;
+  debug("hello world length\n");
   output_queue->desc[buf_index].flags = 0;
+  debug("hello world flags\n");
 
   // add it in the available ring
-  u16 index = output_queue->avail->idx % output_queue->qsize;
+  if (output_queue->qsize == 0) {
+    debug("ZERO, BAKAAA!!!\n");
+  }
+  u16 index = (output_queue->avail->idx) % (output_queue->qsize);
+  debug("hello world calculated index\n");
   output_queue->avail->ring[index] = buf_index;
+  debug("hello world added to ring\n");
   mem_barrier; // section 3.2.1.3.1
   output_queue->avail->idx++;
+  debug("hello world incremented index\n");
   mem_barrier; // section 3.2.1.4.1
 
   // notify the device that there's been a change
+  debug("hello world about to notify\n");
   out_word(iobase+0x10,1);
+  debug("hello world notified\n");
 
   // must not return or the stack will get destroyed
   while (1);

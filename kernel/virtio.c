@@ -75,10 +75,12 @@ struct virtio_device pci_find_virtio() {
         result.bus = bus;
         result.device = device;
         result.iobase = pci_read_bar(bus, device, 0) & 0xFFFC; // we only take the bottom word for some reason
+        debug("found virtio device\n");
         return result;
       }
     }
   }
+  debug("NO VIRTIO DEVICE FOUND");
   // if nothing has been found then there's nothing to do but hang
   halt();
   while (1); // gets rid of compiler warning
@@ -117,7 +119,6 @@ struct virtio_device virtio_init(struct virtio_device res) {
   virtio_negotiate(&supported_features);
   out_dword(iobase+0x04, supported_features);
   /* section 3.1.2 tells us to omit these two steps
-   */
   debug("before status\n");
   status |= VIRTIO_FEATURES_OK;
   out_byte(iobase+0x12, status);
@@ -131,7 +132,6 @@ struct virtio_device virtio_init(struct virtio_device res) {
     crash(0xBABADEAD);
   }
   debug("after check\n");
-  /*
   */
   virtio_queues(&res);
   debug("after queues\n");
@@ -140,6 +140,11 @@ struct virtio_device virtio_init(struct virtio_device res) {
   debug("after status\n");
   virtqueue_setup = 1;
   debug("end debug\n");
+  if (res.queues[1].qsize == 0) {
+    debug("IT WAS THE INIT!!\n");
+  } else {
+    debug("qsize doesn't become zero at init either...\n");
+  }
   return res;
 }
 
@@ -195,18 +200,20 @@ void virtio_queues(struct virtio_device* virtio) {
   out_word(iobase+0x0E,q_addr);
   out_dword(iobase+0x08,bufPage);
   debug("end virtio_queues\n");
+  if (virtio->queues[1].qsize == 0) {
+    debug("WHAT??\n");
+  } else {
+    debug("qsize doesn't become zero here...\n");
+  }
 }
 
 void virtio_handler() {
   if (virtqueue_setup) {
-    in_byte(res.iobase+0x12);
     debug("done\n");
-    halt(0x42);
   } else {
     debug("not done\n");
-    halt(0x42);
   }
-
+  in_byte(res.iobase+0x12);
   nothing();
 }
 
