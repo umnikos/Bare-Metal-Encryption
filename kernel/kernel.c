@@ -1,8 +1,8 @@
 #include "prelude.h"
 #include "virtio.h"
-void terminal_initialize(void);
+void terminal_initialize();
 
-void hello_world(struct virtio_device virtio);
+void hello_world(struct virtio_device *virtio);
 
 void kernel_main() {
   /* Initialize terminal interface */
@@ -10,17 +10,18 @@ void kernel_main() {
   /* Newline support is left as an exercise. */
   debug("-DEBUG-\n");
 
-  struct virtio_device virtio = virtio_init();
-  hello_world(virtio);
+  struct virtio_device virtio;
+  virtio_init(&virtio);
+  hello_world(&virtio);
   crash(0x42424242);
 }
 
-void hello_world(struct virtio_device virtio) {
+void hello_world(struct virtio_device* virtio) {
   const u32 msglen = 20;
   char msg[20] = "Hello, World!\n";
 
-  u16 iobase = virtio.iobase;
-  struct virtq* output_queue = &virtio.queues[1];
+  u16 iobase = virtio->iobase;
+  struct virtq* output_queue = &virtio->queues[1];
   // find next free buffer slot
   u16 buf_index = 10; // TODO - actual searching
 

@@ -5,8 +5,6 @@ extern u8* gimme_memory(u32 pages);
 extern void virtio_handler_prelude();
 extern void set_irq(u8 irq);
 
-struct virtio_device res;
-
 void serial_print(char* str); // TODO
 u16 pci_read_config(u32 bus, u32 device, u32 func, u32 offset);
 u16 pci_read_headertype(u32 bus, u32 device);
@@ -15,8 +13,8 @@ u16 pci_read_deviceid(u32 bus, u32 device);
 u16 pci_read_subsystem(u32 bus, u32 device);
 u16 pci_read_irq(u32 bus, u32 device);
 u32 pci_read_bar(u32 bus, u32 device, u32 number);
-struct virtio_device virtio_init();
-struct virtio_device pci_find_virtio();
+void virtio_init(struct virtio_device* virtio);
+void pci_find_virtio(struct virtio_device* virtio);
 void virtio_negotiate(u32* supported_features);
 void virtio_queues(struct virtio_device* virtio);
 void virtio_handler();
@@ -61,8 +59,7 @@ u32 pci_read_bar(u32 bus, u32 device, u32 number) {
   return (top<<16)+bottom;
 }
 
-struct virtio_device pci_find_virtio() {
-  struct virtio_device result;
+void pci_find_virtio(struct virtio_device* result) {
   for(u32 bus=0; bus<256; bus++) {
     for(u32 device=0; device<32; device++) {
       u16 deviceid = pci_read_deviceid(bus, device);
@@ -72,11 +69,11 @@ struct virtio_device pci_find_virtio() {
       if (deviceid >= 0x1000 &&
           deviceid <= 0x103F && // search only for transitional virtio devices
           pci_read_vendor(bus,device) == 0x1AF4) {
-        result.bus = bus;
-        result.device = device;
-        result.iobase = pci_read_bar(bus, device, 0) & 0xFFFC; // we only take the bottom word for some reason
+        result->bus = bus;
+        result->device = device;
+        result->iobase = pci_read_bar(bus, device, 0) & 0xFFFC; // we only take the bottom word for some reason
         debug("found virtio device\n");
-        return result;
+        return;
       }
     }
   }
@@ -94,7 +91,7 @@ struct virtio_device pci_find_virtio() {
 #define VIRTIO_FAILED 128
 #define VIRTIO_DEVICE_NEEDS_RESET 64
 
-struct virtio_device virtio_init(struct virtio_device res) {
+void virtio_init(struct virtio_device* res) {
   // http://www.dumais.io/index.php?article=aca38a9a2b065b24dfa1dee728062a12
   // iobase offsets are from virtio spec 4, section 4.1.4.8
   // http://docs.oasis-open.org/virtio/virtio/v1.0/virtio-v1.0.pdf
@@ -107,10 +104,10 @@ struct virtio_device virtio_init(struct virtio_device res) {
    * 0001 0000 0000 0000
    */
   debug("start debug\n");
-  res = pci_find_virtio();
-  u8 irq = pci_read_irq(res.bus, res.device);
+  pci_find_virtio(res);
+  u8 irq = pci_read_irq(res->bus, res->device);
   set_irq(0x20+irq);
-  u16 iobase = res.iobase;
+  u16 iobase = res->iobase;
   u8 status = VIRTIO_ACKNOWLEDGE;
   out_byte(iobase+0x12, status);
   status |= VIRTIO_DRIVER;
@@ -133,19 +130,18 @@ struct virtio_device virtio_init(struct virtio_device res) {
   }
   debug("after check\n");
   */
-  virtio_queues(&res);
+  virtio_queues(res);
   debug("after queues\n");
   status |= VIRTIO_DRIVER_OK;
   out_byte(iobase+0x12, status);
   debug("after status\n");
   virtqueue_setup = 1;
-  debug("end debug\n");
-  if (res.queues[1].qsize == 0) {
+  if (res->queues[1].qsize == 0) {
     debug("IT WAS THE INIT!!\n");
   } else {
     debug("qsize doesn't become zero at init either...\n");
   }
-  return res;
+  debug("end debug\n");
 }
 
 void virtio_negotiate(u32* supported_features) {
@@ -213,7 +209,7 @@ void virtio_handler() {
   } else {
     debug("not done\n");
   }
-  in_byte(res.iobase+0x12);
+  // in_byte(res.iobase+0x12);
   nothing();
 }
 
