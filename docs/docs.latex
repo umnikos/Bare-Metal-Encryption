@@ -1,6 +1,6 @@
-\documentclass[a4paper,12pt]{article}
+\documentclass[draft,a4paper,12pt]{article}
 \usepackage[utf8]{inputenc} % specify there may be unicode in .latex file
-\usepackage[bulgarian]{babel} % support for cyrillic
+\usepackage[english,bulgarian]{babel} % support for bulgarian
 %\usepackage{lmodern} % different cyrillic glyphs
 \usepackage{indentfirst} % indent the first line of paragraph
 \usepackage{nameref} % named references to sections
