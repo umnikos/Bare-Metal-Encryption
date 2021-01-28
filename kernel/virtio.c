@@ -136,6 +136,7 @@ void virtio_init(struct virtio_device* res) {
   virtio_queues(res);
   debug("after queues\n");
   status |= VIRTIO_DRIVER_OK;
+  debug("after status variable\n");
   out_byte(iobase+0x12, status);
   debug("after status\n");
   virtqueue_setup = 1;
@@ -192,7 +193,7 @@ void virtio_queues(struct virtio_device* virtio) {
   vq->used = (struct virtq_used*)(buf+(firstPageCount<<12));
 
   vq->avail->idx = 0;
-  vq->avail->flags = 1; // tell device that we don't want interrupts
+  vq->avail->flags = 0; // 1; // tell device that we don't want interrupts
   vq->used->idx = 0;
   vq->used->flags = 0;
 

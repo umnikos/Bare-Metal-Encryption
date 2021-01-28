@@ -104,9 +104,16 @@ void terminal_write(const char* data, size_t size)
 	for (size_t i = 0; i < size; i++)
 		terminal_putchar(data[i]);
 }
+
+uint32_t fibonacci(uint32_t i) {
+	if (i < 2) return 1;
+	else return fibonacci(i-1) + fibonacci(i-2);
+}
  
 void debug(const char* data) 
 {
+	fibonacci(32);
 	terminal_write(data, strlen(data));
 }
+
  
