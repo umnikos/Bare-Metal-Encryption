@@ -104,6 +104,7 @@ struct virtio_device virtio_init(struct virtio_device res) {
    * bar1 = 1000
    * 0001 0000 0000 0000
    */
+  debug("start debug\n");
   res = pci_find_virtio();
   u8 irq = pci_read_irq(res.bus, res.device);
   set_irq(0x20+irq);
@@ -116,19 +117,29 @@ struct virtio_device virtio_init(struct virtio_device res) {
   virtio_negotiate(&supported_features);
   out_dword(iobase+0x04, supported_features);
   /* section 3.1.2 tells us to omit these two steps
+   */
+  debug("before status\n");
   status |= VIRTIO_FEATURES_OK;
   out_byte(iobase+0x12, status);
+  debug("after status\n");
+  debug("before check\n");
   if ((in_byte(iobase+0x12) & VIRTIO_FEATURES_OK) == 0) {
     // the negotiations have failed!
+    debug("FAILED NEGOTIATIONS\n");
     status |= VIRTIO_FAILED;
     out_byte(iobase+0x12, status);
     crash(0xBABADEAD);
   }
+  debug("after check\n");
+  /*
   */
   virtio_queues(&res);
+  debug("after queues\n");
   status |= VIRTIO_DRIVER_OK;
   out_byte(iobase+0x12, status);
+  debug("after status\n");
   virtqueue_setup = 1;
+  debug("end debug\n");
   return res;
 }
 
@@ -137,10 +148,13 @@ void virtio_negotiate(u32* supported_features) {
    * supported_features = 79000006
    * 0111 1001 0000 0000 0000 0000 0000 0110
    */
+  debug("start negotiation\n");
   *supported_features &= 0x00000000;
+  debug("end negotiation\n");
 }
 
 void virtio_queues(struct virtio_device* virtio) {
+  debug("start virtio_queues\n");
   u16 iobase = virtio->iobase;
   // section 5.3.2 tells us what the two queues are
   // only queue #1 is needed for output
@@ -180,13 +194,19 @@ void virtio_queues(struct virtio_device* virtio) {
 
   out_word(iobase+0x0E,q_addr);
   out_dword(iobase+0x08,bufPage);
+  debug("end virtio_queues\n");
 }
 
 void virtio_handler() {
-  in_byte(res.iobase+0x12);
   if (virtqueue_setup) {
-    crash(0xBABABABA);
+    in_byte(res.iobase+0x12);
+    debug("done\n");
+    halt(0x42);
+  } else {
+    debug("not done\n");
+    halt(0x42);
   }
+
   nothing();
 }
 
