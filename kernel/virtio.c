@@ -21,6 +21,8 @@ void virtio_handler();
 
 volatile u8 virtqueue_setup = 0;
 
+struct virtio_device* virtio_for_irq;
+
 #define config_address  0x0CF8
 #define config_data     0x0CFC
 u16 pci_read_config(u32 bus, u32 device, u32 func, u32 offset) {
@@ -105,6 +107,7 @@ void virtio_init(struct virtio_device* res) {
    */
   debug("start debug\n");
   pci_find_virtio(res);
+  virtio_for_irq = res;
   u8 irq = pci_read_irq(res->bus, res->device);
   set_irq(0x20+irq);
   u16 iobase = res->iobase;
@@ -189,7 +192,7 @@ void virtio_queues(struct virtio_device* virtio) {
   vq->used = (struct virtq_used*)(buf+(firstPageCount<<12));
 
   vq->avail->idx = 0;
-  vq->avail->flags = 0;
+  vq->avail->flags = 1; // tell device that we don't want interrupts
   vq->used->idx = 0;
   vq->used->flags = 0;
 
@@ -204,12 +207,8 @@ void virtio_queues(struct virtio_device* virtio) {
 }
 
 void virtio_handler() {
-  if (virtqueue_setup) {
-    debug("done\n");
-  } else {
-    debug("not done\n");
-  }
-  // in_byte(res.iobase+0x12);
+  debug("IRQ\n");
+  in_byte(virtio_for_irq->iobase+0x12);
   nothing();
 }
 
