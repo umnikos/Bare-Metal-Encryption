@@ -21,7 +21,7 @@ void virtio_handler();
 
 volatile u8 virtqueue_setup = 0;
 
-struct virtio_device* virtio_for_irq;
+volatile struct virtio_device* virtio_for_irq;
 
 #define config_address  0x0CF8
 #define config_data     0x0CFC
@@ -162,54 +162,97 @@ void virtio_queues(struct virtio_device* virtio) {
   debug("start virtio_queues\n");
   u16 iobase = virtio->iobase;
   // section 5.3.2 tells us what the two queues are
-  // only queue #1 is needed for output
-  u32 q_addr = 1;
+  for (u32 q_addr=0; q_addr<2; q_addr++) {
 
-  // sections 2.4 and onward describes the queue layout
+    // sections 2.4 and onward describes the queue layout
 
-  // get queue size
-  out_word(iobase+0x0E,1);
-  u16 q_size = in_word(iobase+0x0C);
-  if (q_size == 0) {
-    crash(0x01010101);
-  }
+    // get queue size
+    out_word(iobase+0x0E,q_addr);
+    u16 q_size = in_word(iobase+0x0C);
+    if (q_size == 0) {
+      crash(0x01010101);
+    }
 
-  // allocate queue
-  // formula given by section 2.4.2
-  u32 sizeofBuffers = (sizeof(struct virtq_desc)*q_size);
-  u32 sizeofQueueAvailable = (sizeof(u16)*(3+q_size));
-  u32 sizeofQueueUsed = (sizeof(u16)*3 + sizeof(struct virtq_used_elem)*q_size);
+    // allocate queue
+    // formula given by section 2.4.2
+    u32 sizeofBuffers = (sizeof(struct virtq_desc)*q_size);
+    u32 sizeofQueueAvailable = (sizeof(u16)*(3+q_size));
+    u32 sizeofQueueUsed = (sizeof(u16)*3 + sizeof(struct virtq_used_elem)*q_size);
 #define page_count(bytes) ((bytes+0x0FFF)>>12)
-  u32 firstPageCount = page_count(sizeofBuffers + sizeofQueueAvailable);
-  u32 secondPageCount = page_count(sizeofQueueUsed);
-  u32 queuePageCount = firstPageCount+secondPageCount;
-  u8* buf = gimme_memory(queuePageCount);
-  u32 bufPage = (u32)buf >> 12;
+    u32 firstPageCount = page_count(sizeofBuffers + sizeofQueueAvailable);
+    u32 secondPageCount = page_count(sizeofQueueUsed);
+    u32 queuePageCount = firstPageCount+secondPageCount;
+    u8* buf = gimme_memory(queuePageCount);
+    u32 bufPage = (u32)buf >> 12;
 
-  struct virtq* vq = &virtio->queues[1];
-  vq->qsize = q_size;
-  vq->desc = (struct virtq_desc*)buf;
-  vq->avail = (struct virtq_avail*)(buf+sizeofBuffers);
-  vq->used = (struct virtq_used*)(buf+(firstPageCount<<12));
+    struct virtq* vq = &virtio->queues[q_addr];
+    vq->qsize = q_size;
+    vq->desc = (struct virtq_desc*)buf;
+    vq->avail = (struct virtq_avail*)(buf+sizeofBuffers);
+    vq->used = (struct virtq_used*)(buf+(firstPageCount<<12));
 
-  vq->avail->idx = 0;
-  vq->avail->flags = 0; // 1; // tell device that we don't want interrupts
-  vq->used->idx = 0;
-  vq->used->flags = 0;
+    vq->avail->idx = 0;
+    vq->avail->flags = 0; // 1; // tell device that we don't want interrupts
+    vq->used->idx = 0;
+    vq->used->flags = 0;
 
-  out_word(iobase+0x0E,q_addr);
-  out_dword(iobase+0x08,bufPage);
-  debug("end virtio_queues\n");
-  if (virtio->queues[1].qsize == 0) {
-    debug("WHAT??\n");
-  } else {
-    debug("qsize doesn't become zero here...\n");
+    out_word(iobase+0x0E,q_addr);
+    out_dword(iobase+0x08,bufPage);
+    debug("virtqueue created\n");
   }
+
+  debug("end virtio_queues\n");
 }
+
+volatile uint32_t block_counter = 20;
+volatile char throwaway_receive_buffer[1024] = "{init value}";
+
+void disable_interrupts();
 
 void virtio_handler() {
   debug("IRQ\n");
+  /*
+  // debug(throwaway_receive_buffer);
+
+  u16 iobase = virtio_for_irq->iobase;
+  volatile struct virtq* queue = &virtio_for_irq->queues[0];
+  // find next free buffer slot
+  u16 buf_index = block_counter;
+  block_counter++;
+
+  debug("irq started\n");
+
+  // set buffer slot's address to message string
+  queue->desc[buf_index].addr = ((u64)(u32)throwaway_receive_buffer) & 0xFFFFFFFF;
+  debug("irq address\n");
+  queue->desc[buf_index].len = 1024;
+  debug("irq length\n");
+  queue->desc[buf_index].flags = 2; // write-only
+  debug("irq flags\n");
+
+  // add it in the available ring
+  if (queue->qsize == 0) {
+    debug("ZERO, BAKAAA!!!\n");
+  }
+  u16 index = (queue->avail->idx) % (queue->qsize);
+  debug("irq calculated index\n");
+  queue->avail->ring[index] = buf_index;
+  debug("irq added to ring\n");
+  mem_barrier; // section 3.2.1.3.1
+  queue->avail->idx++;
+  debug("irq incremented index\n");
+  mem_barrier; // section 3.2.1.4.1
+
+  // notify the device that there's been a change
+  debug("irq about to notify\n");
+  out_word(iobase+0x10,1);
+  debug("irq notified\n");
+  */
+
+  // notify device it's all good now
   in_byte(virtio_for_irq->iobase+0x12);
   nothing();
+
+  disable_interrupts();
 }
 
