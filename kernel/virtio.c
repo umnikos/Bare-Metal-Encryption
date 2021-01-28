@@ -137,7 +137,7 @@ void virtio_negotiate(u32* supported_features) {
    * supported_features = 79000006
    * 0111 1001 0000 0000 0000 0000 0000 0110
    */
-  *supported_features &= 0xFF000000; // TODO - figure out what the top 8 bits do
+  *supported_features &= 0x00000000;
 }
 
 void virtio_queues(struct virtio_device* virtio) {

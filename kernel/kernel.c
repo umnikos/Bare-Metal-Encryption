@@ -1,9 +1,15 @@
 #include "prelude.h"
 #include "virtio.h"
+void terminal_initialize(void);
 
 void hello_world(struct virtio_device virtio);
 
 void kernel_main() {
+  /* Initialize terminal interface */
+  terminal_initialize();
+  /* Newline support is left as an exercise. */
+  debug("-DEBUG-\n");
+
   struct virtio_device virtio = virtio_init();
   hello_world(virtio);
   crash(0x42424242);
