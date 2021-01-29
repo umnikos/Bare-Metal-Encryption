@@ -1,15 +1,15 @@
-\documentclass[draft,a4paper,12pt]{article}
+\documentclass[a4paper,12pt]{article}
 \usepackage[utf8]{inputenc} % specify there may be unicode in .latex file
 \usepackage[english,bulgarian]{babel} % support for bulgarian
 \usepackage{csquotes} % babel wants it for some reason
-%\usepackage{lmodern} % different cyrillic glyphs
+\usepackage{lmodern} % different font
 \usepackage{indentfirst} % indent the first line of paragraph
 \usepackage{nameref} % named references to sections
 \usepackage{graphicx} % for including graphics (images)
 \usepackage{geometry} % for changing page dimensions and header space
 \usepackage{sectsty} % for changing font size only for sections
 \usepackage[backend=bibtex,sorting=none]{biblatex} % for bibliography and citations
-%\usepackage{listings} % for inserting code
+\usepackage{listings} % for inserting code
 %\usepackage{color} % color for code
 \usepackage{xcolor} % for colored text
 \usepackage{chngcntr} % to make table numbers include section numbers
