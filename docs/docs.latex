@@ -1,6 +1,7 @@
 \documentclass[draft,a4paper,12pt]{article}
 \usepackage[utf8]{inputenc} % specify there may be unicode in .latex file
 \usepackage[english,bulgarian]{babel} % support for bulgarian
+\usepackage{csquotes} % babel wants it for some reason
 %\usepackage{lmodern} % different cyrillic glyphs
 \usepackage{indentfirst} % indent the first line of paragraph
 \usepackage{nameref} % named references to sections
@@ -13,6 +14,7 @@
 \usepackage{xcolor} % for colored text
 \usepackage{chngcntr} % to make table numbers include section numbers
 \usepackage[perpage]{footmisc} % footnote counter resets at 1 each page
+\usepackage{amsmath} % math alignment stuff
 
 % make table numbers depend on section number
 \counterwithin{table}{section}
