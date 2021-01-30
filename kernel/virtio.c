@@ -109,6 +109,13 @@ void virtio_init(struct virtio_device* res) {
   pci_find_virtio(res);
   virtio_for_irq = res;
   u8 irq = pci_read_irq(res->bus, res->device);
+  if (irq < 8) {
+    debug("IRQ IN FIRST RANGE!\n");
+  } else if (irq >= 8 && irq < 16) {
+    debug("irq in second range\n");
+  } else {
+    debug("IRQ IN UNKNOWN RANGE!\n");
+  }
   set_irq(0x20+irq);
   u16 iobase = res->iobase;
   u8 status = VIRTIO_ACKNOWLEDGE;
