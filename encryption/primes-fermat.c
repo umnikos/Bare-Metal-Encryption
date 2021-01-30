@@ -1,6 +1,7 @@
 #include "prelude.h"
 
 #define fermat_iterations 50
+#define fermat_gcd_test
 
 byte is_prime_fermat(ii* p) {
   mkii(p_minus_one);
@@ -12,6 +13,13 @@ byte is_prime_fermat(ii* p) {
     i rn = rng();
     //printf("%u\n", rn);
     bignum_from_int(n, rn);
+#ifdef fermat_gcd_test
+    gcd(p, n, temp);
+    bignum_dec(temp);
+    if (!bignum_is_zero(temp)) {
+      return false;
+    }
+#endif
     modular_exponentiation(n, p_minus_one, p, temp);
     bignum_dec(temp);
     if (!bignum_is_zero(temp)) {
