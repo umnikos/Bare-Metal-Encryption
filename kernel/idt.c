@@ -10,6 +10,7 @@ struct idt_entry {
 } __attribute__((packed));
 
 extern struct idt_entry idt[];
+extern void idt_handler0();
 extern void idt_handler1();
 extern void idt_handler2();
 extern void enable_interrupts();
@@ -36,12 +37,15 @@ void fill_idt() {
 
   for (u32 i=0; i<256; i++) {
     struct idt_entry ih;
-    if (i < 8) {
+    if (i >= 0x20 && i < 0x28) {
       ih.offset_1 = (u32)idt_handler1 & 0xFFFF;
       ih.offset_2 = ((u32)idt_handler1 & 0xFFFF0000) >> 16;
-    } else {
+    } else if (i >= 0x28 && i < 0x30) {
       ih.offset_1 = (u32)idt_handler2 & 0xFFFF;
       ih.offset_2 = ((u32)idt_handler2 & 0xFFFF0000) >> 16;
+    } else {
+      ih.offset_1 = (u32)idt_handler0 & 0xFFFF;
+      ih.offset_2 = ((u32)idt_handler0 & 0xFFFF0000) >> 16;
     }
     ih.zero = 0;
     ih.selector = 0x08;
