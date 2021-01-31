@@ -66,6 +66,8 @@ void pci_find_virtio(struct virtio_device* result) {
       // there should be a subsystem check
       // but I don't know what the subsystem number of virtio-serial is
       // (it happens to be 3)
+      // TODO - check if device is really a virtio-serial device
+      // TODO - support for more than one virtio device
       if (deviceid >= 0x1000 &&
           deviceid <= 0x103F && // search only for transitional virtio devices
           pci_read_vendor(bus,device) == 0x1AF4) {

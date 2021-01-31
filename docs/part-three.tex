@@ -315,12 +315,74 @@ void virtio_init(struct virtio_device* res) {
 
 След това инициализираме прекъсванията като прочетем кое прекъсване отговаря на virtio устройството, добавим 0x20 към него (защото там сме нагласили PIC контролерите) и нагласим функцията която отговаря за прекъсването да го гледа чрез {\tt set\_irq}. Функцията също ще се нуждае от {\tt virtio\_device} структурата, но понеже няма как да и я подадем като параметър я съхраняваме като глобална променлива.
 
-Вече може да започне самото инициализиране на устройството както е обяснено в \{3.1.1\}. Първата стъпка можем да я пропуснем защото устройството започва рестартирано. След това включваме {\tt ACKNOWLEDGE} и {\tt DRIVER} статус битовете (стъпки 2 и 3), четем какви функции поддържа устройството и се договаряме (стъпка 4), пропускаме стъпки 5 и 6 \{3.1.2\}, инициализираме и пълним virtqueue опашките (стъпка 7) и казваме на устройството че сме готови (стъпка 8) чрез DRIVER_OK статус бит.
+Вече може да започне самото инициализиране на устройството както е обяснено в \{3.1.1\}. Първата стъпка можем да я пропуснем защото устройството започва рестартирано. След това включваме {\tt ACKNOWLEDGE} и {\tt DRIVER} статус битовете (стъпки 2 и 3), четем какви функции поддържа устройството и се договаряме (стъпка 4), пропускаме стъпки 5 и 6 \{3.1.2\}, инициализираме и пълним virtqueue опашките (стъпка 7) и казваме на устройството че сме готови (стъпка 8) чрез DRIVER\_OK статус бит.
+
+Всички {\tt pci\_read\_*} команди са имплементирани чрез {\tt pci\_read\_config}, което приема bus и device номер както и изместване за да изберем коя част от PCI header-ът да бъде прочетена. Повече информация може да намерите онлайн\parencite{pciheader}, ето дефинициите на всички подобни функции в кода:
+\begin{lstlisting}[language=C]
+#define config_address  0x0CF8
+#define config_data     0x0CFC
+u16 pci_read_config(u32 bus, u32 device, u32 func, u32 offset) {
+  u32 address = (u32)((bus << 16) | (device << 11) |
+                     (func << 8) | (offset & 0xfc) |
+                     ((u32)0x80000000));
+  out_dword(config_address, address);
+  u16 tmp = (u16)((in_dword(config_data) >> ((offset & 2) * 8)) & 0xffff);
+  return tmp;
+}
+
+u16 pci_read_headertype(u32 bus, u32 device) {
+  return pci_read_config(bus,device,0,0x0E) & 0x00FF;
+}
+
+u16 pci_read_vendor(u32 bus, u32 device) {
+  return pci_read_config(bus,device,0,0);
+}
+
+u16 pci_read_deviceid(u32 bus, u32 device) {
+  return pci_read_config(bus,device,0,2);
+}
+
+u16 pci_read_subsystem(u32 bus, u32 device) {
+  return pci_read_config(bus,device,0,0x2E);
+}
+
+u16 pci_read_irq(u32 bus, u32 device) {
+  return pci_read_config(bus,device,0,0x3C) & 0x00FF;
+}
+
+u32 pci_read_bar(u32 bus, u32 device, u32 number) {
+  u16 bottom = pci_read_config(bus,device,0, 0x10 + number*4);
+  u16 top = pci_read_config(bus,device,0, 0x12 + number*4);
+  return (top<<16)+bottom;
+}
+\end{lstlisting}
 
 \subsubsection{Търсене на virtio устройство по PCI}
-% TODO - pci_find_virtio - sets everything but virtqueues in virtio_device
-% TODO - pci_read_config
-% TODO - pci_read_irq & friends
+Търсенето става чрез итерирането през всички възможни комбинации на bus номер и device номер. При неуспешно намиране на virtio устройство просто спираме компютъра понеже проектът изцяло зависи от това да намерим virtio-serial устройството за входно-изходни операции.
+\begin{lstlisting}[language=C]
+void pci_find_virtio(struct virtio_device* result) {
+  for(u32 bus=0; bus<256; bus++) {
+    for(u32 device=0; device<32; device++) {
+      u16 deviceid = pci_read_deviceid(bus, device);
+      if (deviceid >= 0x1000 &&
+          deviceid <= 0x103F && // only old virtio devices
+          pci_read_vendor(bus,device) == 0x1AF4) {
+        result->bus = bus;
+        result->device = device;
+        result->iobase = pci_read_bar(bus, device, 0) & 0xFFFC;
+        return;
+      }
+    }
+  }
+  // hang when nothing is found
+  halt();
+  while (1);
+}
+\end{lstlisting}
+{\tt iobase} взимаме от първия\footnote{Не съм сигурен дали винаги е първия но е много вероятно.} BAR адрес. Всеки BAR адрес може да съдържа или адрес в паметта или IO порт адрес. Най-младшият бит е 1 когато е IO адрес, а битът директно след него е запазен за бъдещи цели и не знаем какъв е. Въпреки че BAR адресът е 32 битова стойност, един IO порт е 16 бита и следователно само първите 16 бита от адреса ни трябват.
+
+Един от проблемите на този код е че не проверява дали типът на устройството е virtio-serial устройство. Лесно се добавя тази проверка но тъй като никъде във virtio документацията не намерих ``virtio-serial'' устройство и неговия номер не добавих тази проверка. Почти съм сигурен че е номер 3 (console device).
+Втори проблем е че винаги избира първото virtio устройство което намери. Това не е фатално стига да имаме само едно virtio устройство свързано.
 
 \subsubsection{Договаряне с virtio устройство}
 % TODO - virtio_negotiate
@@ -329,7 +391,7 @@ void virtio_init(struct virtio_device* res) {
 % TODO - virtio_queues - creates and populates queues
 
 \subsubsection{Отговаряне на прекъсвания}
-% TODO - set_irq
+% TODO - set_irq (0x20 already added to it)
 % TODO - interrupt handler
 
 \subsubsection{``Hello, World!''}
