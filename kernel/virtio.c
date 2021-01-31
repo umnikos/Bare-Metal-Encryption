@@ -19,8 +19,6 @@ void virtio_negotiate(u32* supported_features);
 void virtio_queues(struct virtio_device* virtio);
 void virtio_handler();
 
-volatile u8 virtqueue_setup = 0;
-
 volatile struct virtio_device* virtio_for_irq;
 
 #define config_address  0x0CF8
@@ -119,6 +117,12 @@ void virtio_init(struct virtio_device* res) {
   set_irq(0x20+irq);
   u16 iobase = res->iobase;
   u8 status = VIRTIO_ACKNOWLEDGE;
+  // TODO - reset device before initialization (section 4.3.3.3)
+  u8 status_in = in_byte(iobase+0x12);
+  if (status_in & VIRTIO_DEVICE_NEEDS_RESET) {
+    debug("THE DEVICE NEEDS A RESET!\n");
+  }
+
   out_byte(iobase+0x12, status);
   status |= VIRTIO_DRIVER;
   out_byte(iobase+0x12, status);
@@ -142,11 +146,14 @@ void virtio_init(struct virtio_device* res) {
   */
   virtio_queues(res);
   debug("after queues\n");
+  status_in = in_byte(iobase+0x12);
+  if (status_in & VIRTIO_DEVICE_NEEDS_RESET) {
+    debug("THE DEVICE NEEDS A RESET!\n");
+  }
   status |= VIRTIO_DRIVER_OK;
   debug("after status variable\n");
   out_byte(iobase+0x12, status);
   debug("after status\n");
-  virtqueue_setup = 1;
   if (res->queues[1].qsize == 0) {
     debug("IT WAS THE INIT!!\n");
   } else {

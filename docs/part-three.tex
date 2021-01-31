@@ -112,6 +112,7 @@ init_gdt:
 \end{lstlisting}
 
 \subsubsection{Създаване на IDT таблица}
+% TODO - set_irq() function
 Създаването на IDT таблица е малко по-сложно от създаването на GDT таблица защото има много повече редове, които трябва да се попълнят. Не е проблем ако са попълнени повече редове отколкото е нужно, затова съм попълнил 256 от тях за всеки случай. Всеки ред заема 8 байта, следователно трябва да резервираме общо $8\times 256$ байта за цялата таблица:
 \begin{lstlisting}
 section .data
@@ -182,7 +183,7 @@ void fill_idt() {
   }
 }
 \end{lstlisting}
-Първото което прави е да пренасочи PIC (Programmable Interrupt Controller) контролерите да приемат прекъсвания между адреси 0x20 и 0x29 (защото предишните адреси са заети от прекъсванията на самия процесор). След това таблицата се пълни с три различни функции:
+Първото което прави е да пренасочи PIC (виж \ref{pic}) контролерите да приемат прекъсвания между адреси 0x20 и 0x29 (защото предишните адреси са заети от прекъсванията на самия процесор). След това таблицата се пълни с три различни функции:
 \begin{lstlisting}
 section .text
 global idt_handler0
@@ -220,7 +221,119 @@ void kernel_main() {
 \end{lstlisting}
 
 \subsection{Реализация на virtio-serial драйвер}
-% TODO
+За тази част от документацията ще използвам ``\{\textit{текст}\}'' за да означавам части от virtio документацията.\parencite{virtiodocs}
+
+Приключението започва във функцията {\tt virtio\_init}, която се извиква от {\tt kernel\_main} и има за дел да намери и инициализира virtio-serial устройството. Преди да покажа кода на функцията ще покажа нейния тип:
+\begin{lstlisting}[language=C]
+struct virtio_device {
+  u32 bus;
+  u32 device;
+  u16 iobase;
+  struct virtq queues[2];
+};
+
+void virtio_init(struct virtio_device* virtio);
+\end{lstlisting}
+Поради липсата на {\tt malloc}, {\tt virtio\_init} приема пойнтер към празна {\tt virtio\_device} структура, която да бъде напълнена.
+
+{\tt bus} и {\tt device} са резултатите от търсенето по PCI. Те са достатъчни че да се намери {\tt iobase} но съм го включил в структурата за улеснение. {\tt struct virtq queues[2]} са двете virtio опашки, структурата за които може да намерите в \{Appendix A. virtio\_queue.h\} но за пълнота на тази документация ги представям и тук:
+\begin{lstlisting}[language=C]
+struct virtq_desc {
+  uint64_t addr;
+  uint32_t len;
+  uint16_t flags;
+  uint16_t next; // for descriptor chaining
+};
+
+// avaiable header
+// only written by driver and read by the device
+struct virtq_avail {
+  uint16_t flags;
+  uint16_t idx; // index of next free slot in ring
+  uint16_t ring[]; // list of frames.
+                   // they just hold an index to a descriptor
+};
+
+struct virtq_used_elem {
+  uint32_t id; // index of descriptor.
+               // uint32_t for padding reasons
+  uint32_t len; // total number of bytes written to buffer
+};
+
+// used header
+// only written by device and read by the driver
+struct virtq_used {
+  uint16_t flags;
+  uint16_t idx; // index of next free slot in ring
+  struct virtq_used_elem ring[]; // list of frames
+};
+
+struct virtq {
+  struct virtq_desc *desc;
+  struct virtq_avail *avail;
+  struct virtq_used *used;
+  uint16_t qsize; // number of buffers
+                  // always a power of 2
+};
+\end{lstlisting}
+Структурата е обяснена в част \ref{virtqueue} от тази документация.
+
+Вече мога да обясня кодът на {\tt virtio\_init}:
+\begin{lstlisting}[language=C]
+#define VIRTIO_ACKNOWLEDGE 1
+#define VIRTIO_DRIVER 2
+#define VIRTIO_FEATURES_OK 8
+#define VIRTIO_DRIVER_OK 4
+#define VIRTIO_FAILED 128
+#define VIRTIO_DEVICE_NEEDS_RESET 64
+
+void virtio_init(struct virtio_device* res) {
+  pci_find_virtio(res);
+
+  virtio_for_irq = res;
+  u8 irq = pci_read_irq(res->bus, res->device);
+  set_irq(0x20+irq);
+
+  u16 iobase = res->iobase;
+  u8 status = VIRTIO_ACKNOWLEDGE;
+  out_byte(iobase+0x12, status);
+
+  status |= VIRTIO_DRIVER;
+  out_byte(iobase+0x12, status);
+
+  u32 supported_features = in_dword(iobase+0x00);
+  virtio_negotiate(&supported_features);
+  out_dword(iobase+0x04, supported_features);
+
+  virtio_queues(res);
+
+  status |= VIRTIO_DRIVER_OK;
+  out_byte(iobase+0x12, status);
+}
+\end{lstlisting}
+Първото което правим е да открием устройството като извикаме {\tt pci\_find\_virtio}. Функцията попълва {\tt bus}, {\tt device} и {\tt iobase} полетата от {\tt virtio\_device} структурата.
+
+След това инициализираме прекъсванията като прочетем кое прекъсване отговаря на virtio устройството, добавим 0x20 към него (защото там сме нагласили PIC контролерите) и нагласим функцията която отговаря за прекъсването да го гледа чрез {\tt set\_irq}. Функцията също ще се нуждае от {\tt virtio\_device} структурата, но понеже няма как да и я подадем като параметър я съхраняваме като глобална променлива.
+
+Вече може да започне самото инициализиране на устройството както е обяснено в \{3.1.1\}. Първата стъпка можем да я пропуснем защото устройството започва рестартирано. След това включваме {\tt ACKNOWLEDGE} и {\tt DRIVER} статус битовете (стъпки 2 и 3), четем какви функции поддържа устройството и се договаряме (стъпка 4), пропускаме стъпки 5 и 6 \{3.1.2\}, инициализираме и пълним virtqueue опашките (стъпка 7) и казваме на устройството че сме готови (стъпка 8) чрез DRIVER_OK статус бит.
+
+\subsubsection{Търсене на virtio устройство по PCI}
+% TODO - pci_find_virtio - sets everything but virtqueues in virtio_device
+% TODO - pci_read_config
+% TODO - pci_read_irq & friends
+
+\subsubsection{Договаряне с virtio устройство}
+% TODO - virtio_negotiate
+
+\subsubsection{Създаване на virtqueue опашките}
+% TODO - virtio_queues - creates and populates queues
+
+\subsubsection{Отговаряне на прекъсвания}
+% TODO - set_irq
+% TODO - interrupt handler
+
+\subsubsection{``Hello, World!''}
+% TODO - hello_world
 
 \subsection{Реализация на RSA}
 %TODO
