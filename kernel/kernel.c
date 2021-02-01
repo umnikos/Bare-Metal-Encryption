@@ -18,8 +18,8 @@ void kernel_main() {
 }
 
 void hello_world(struct virtio_device* virtio) {
-  const u32 msglen = 20;
-  static const char msg[20] = "Hello, World!\n";
+  const u32 msglen = 16;
+  static const char msg[] = "Hello, World!\n\0\0\0\0\0";
 
   virtq_insert(virtio, 1, msg, msglen, 0);
 
