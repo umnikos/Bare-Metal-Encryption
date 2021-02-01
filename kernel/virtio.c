@@ -5,7 +5,7 @@ extern u8* gimme_memory(u32 pages);
 extern void virtio_handler_prelude();
 extern void set_irq(u8 irq);
 
-void serial_print(char* str); // TODO
+void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u8 flags);
 u16 pci_read_config(u32 bus, u32 device, u32 func, u32 offset);
 u16 pci_read_headertype(u32 bus, u32 device);
 u16 pci_read_vendor(u32 bus, u32 device);
@@ -253,7 +253,8 @@ void virtio_queues(struct virtio_device* virtio) {
     vq->used->flags = 0;
 
     if (q_addr == 0) {
-      add_to_input_queue();
+      static char input_buff[1025];
+      virtq_insert(virtio, 0, input_buff, 1023, 2);
     }
 
     out_word(iobase+0x0E,q_addr);
@@ -264,6 +265,43 @@ void virtio_queues(struct virtio_device* virtio) {
   debug("end virtio_queues\n");
 }
 
+void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u8 flags) {
+  u16 iobase = virtio->iobase;
+  struct virtq* queue = &virtio->queues[queue_num];
+  // find next free buffer slot
+  // TODO - actual searching
+  static u16 buf_index = 0;
+  buf_index++;
+
+  debug("virtq_insert started\n");
+
+  // set buffer slot's address to message string
+  queue->desc[buf_index].addr = ((u64)(u32)buf) & 0xFFFFFFFF;
+  debug("virtq_insert address\n");
+  queue->desc[buf_index].len = len;
+  debug("virtq_insert length\n");
+  queue->desc[buf_index].flags = flags;
+  debug("virtq_insert flags\n");
+
+  // add it in the available ring
+  if (queue->qsize == 0) {
+    debug("ZERO, BAKAAA!!!\n");
+  }
+  u16 index = (queue->avail->idx) % (queue->qsize);
+  debug("virtq_insert calculated index\n");
+  queue->avail->ring[index] = buf_index;
+  debug("virtq_insert added to ring\n");
+  mem_barrier; // section 3.2.1.3.1
+  queue->avail->idx++;
+  debug("virtq_insert incremented index\n");
+  mem_barrier; // section 3.2.1.4.1
+
+  // notify the device that there's been a change
+  debug("virtq_insert about to notify\n");
+  out_word(iobase+0x10,1);
+  debug("virtq_insert notified\n");
+
+}
 
 void disable_interrupts();
 
