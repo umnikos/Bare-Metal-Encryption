@@ -1,12 +1,28 @@
-\documentclass[a4paper]{article}
+\documentclass[draft,a4paper,12pt]{article}
 \usepackage[utf8]{inputenc} % specify there may be unicode in .latex file
-\usepackage[bulgarian]{babel} % support for cyrillic
-%\usepackage{lmodern} % different cyrillic glyphs
-%\usepackage{indentfirst} % indent the first line of paragraph
+\usepackage[english,bulgarian]{babel} % support for bulgarian
+\usepackage{csquotes} % babel wants it for some reason
+\usepackage{lmodern} % different font
+%\usepackage{pxfonts} % different font
+\usepackage{indentfirst} % indent the first line of paragraph
 \usepackage{nameref} % named references to sections
 \usepackage{graphicx} % for including graphics (images)
 \usepackage{geometry} % for changing page dimensions and header space
 \usepackage{sectsty} % for changing font size only for sections
+\usepackage[backend=bibtex,sorting=none]{biblatex} % for bibliography and citations
+\usepackage[final]{listings} % for inserting code
+%\usepackage{color} % color for code
+\usepackage{xcolor} % for colored text
+\usepackage{chngcntr} % to make table numbers include section numbers
+\usepackage[perpage]{footmisc} % footnote counter resets at 1 each page
+\usepackage{amsmath} % math alignment stuff
+
+% make table numbers depend on section number
+\counterwithin{table}{section}
+%\counterwithin{table}{subsection}
+%\counterwithin{table}{subsubsection}
+
+\addbibresource{refs} % specify file with references
 
 % shrink page margins
 \addtolength{\oddsidemargin}{-.875in}
@@ -16,77 +32,34 @@
 \addtolength{\textheight}{1.75in}
 
 % \section-specific styling
-\sectionfont{\fontsize{22}{25}\selectfont}
-\subsectionfont{\fontsize{18}{20}\selectfont}
+\sectionfont{\fontsize{22}{24}\selectfont}
+\subsectionfont{\fontsize{20}{22}\selectfont}
+\subsubsectionfont{\fontsize{18}{20}\selectfont}
 
 \begin{document}
 
 \fontsize{14pt}{20}\selectfont % change font to 14pt
 
+%Преди започване на писането на код проучването се състоеше от четене на книгата "The little book about OS development"\parencite{osbook}, което ми предостави обща представа за това как работи един компютър на ниско ниво и кои части от операционната система ще трябва да създам за да мога да направя приложната част от продукта. След това най-полезният ресурс беше "OSDev.org"\parencite{oswiki}, уики за всичко свързано с писането на операционни системи, което предоставя всички нужни детайли за да напиша кода в действителност. Но при създаването на virtio-serial драйвера гледах и официалната документация на virtio\parencite{virtiodocs} и един блог пост обясняващ вече написан virtio мрежови драйвер\parencite{virtioblogpost}.
+%Общи знания за алгоритъма получих от видео серията "Public Key Cryptography"\parencite{artoftheproblemrsa} от "Art of the Problem". Конкретни детайли намирах в Wikipedia\parencite{wikipedia} защото Wikipedia предоставя много добри и пълни обяснения за каквото и да било свързано с математика.
 
-% title page
-\thispagestyle{empty} % hide line numbers for this page only
-\begin{center}
-  \textbf{
-    ТЕХНОЛОГИЧНО УЧИЛИЩЕ ЕЛЕКТРОННИ СИСТЕМИ \\
-    към ТЕХНИЧЕСКИ УНИВЕРСИТЕТ - СОФИЯ \\
-  }
-
-  \vspace{70mm}
-  \textbf{\huge ДИПЛОМНА РАБОТА \\ }
-
-  \vspace{20mm}
-  {\Large Тема:
-    Bare-metal application за x86 архитектура \\
-    работещо върху QEMU/KVM hypervisor
-  }
-
-  \vspace{35mm}
-  \begin{tabular}{p{8cm}p{8cm}}
-    \centering
-    Дипломант: \\
-    Алекс Стефанов
-    &
-    \centering
-    Научен ръководител: \\
-    Стоил Стоилов
-  \end{tabular}
-
-  \vfill
-  СОФИЯ \\
-  \hfill \\
-  2 0 2 1 \\
-\end{center}
-\newpage
-
-% blank page
-\thispagestyle{empty}
-\hfill
-\newpage
-
-% introduction (1-2 pages)
-\section*{Въведение}
-
-% research (8-10 pages)
-\section{Проучване}
-
-% software description (8-10 pages)
-\section{Избор на средства}
-\subsection{Изисквания} % RSA on bare metal
-\subsection{Избор на език за програмиране и библиотеки} % C, tiny-bignum-c
-\subsection{Описание на алгоритъма}
-
-% implementation (10-15 pages)
-\section{Реализация}
-
-% usage manual (6-10 pages)
-\section{Ръководство на потребителя}
-\subsection{Инсталация}
-
-% conclusion (1 page)
-\section*{Заключение}
+\include{title-page}
+\include{blank-page}
+\include{intro}
+\include{part-one}
+\include{part-two}
+\include{part-three}
+\include{part-four}
+\include{conclusion}
 
 % citations (unbounded)
-\section*{Библиография}
+\newpage
+\addcontentsline{toc}{section}{Литература}
+\printbibliography
+
+% table of contents
+\newpage
+\addcontentsline{toc}{section}{Съдържание}
+\tableofcontents
 
 \end{document}

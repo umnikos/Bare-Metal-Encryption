@@ -5,8 +5,8 @@ extern void heap_size();
 extern void heap_start();
 extern void heap_end();
 
-u32 given_pages = 0;
 u8* gimme_memory(u32 pages) {
+  static u32 given_pages = 0;
   if ((u32)heap_start & 0x00000FFF) { // this check isn't necessary, it's here for my own sanity
     crash(0xBAADF00D);
   }

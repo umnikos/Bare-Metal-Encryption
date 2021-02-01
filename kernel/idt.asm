@@ -9,20 +9,26 @@ idt:
 idt_end:
 
 section .text
+global idt_handler0
 global idt_handler1
 global idt_handler2
+extern crash
+idt_handler0:
+                push 0x87654321
+                call crash
+                iret
 idt_handler1:
-                pusha
+                pushad
                 mov al, 0x20
                 out 0x20, al
-                popa
+                popad
                 iret
 idt_handler2:
-                pusha
+                pushad
                 mov al, 0x20
                 out 0xA0, al
                 out 0x20, al
-                popa
+                popad
                 iret
 
 extern fill_idt

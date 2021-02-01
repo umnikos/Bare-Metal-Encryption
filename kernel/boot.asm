@@ -29,9 +29,9 @@ extern disable_interrupts
 extern enable_interrupts
 extern kernel_main
 _start:
-                call disable_interrupts         ; disable interrupts while we're setting up stuff
-
                 mov esp, stack_top              ; setup the stack (needed for C)
+
+                call disable_interrupts         ; disable interrupts while we're setting up stuff
 
 extern init_gdt
                 call init_gdt
