@@ -379,16 +379,77 @@ void pci_find_virtio(struct virtio_device* result) {
   while (1);
 }
 \end{lstlisting}
-{\tt iobase} взимаме от първия\footnote{Не съм сигурен дали винаги е първия но е много вероятно.} BAR адрес. Всеки BAR адрес може да съдържа или адрес в паметта или IO порт адрес. Най-младшият бит е 1 когато е IO адрес, а битът директно след него е запазен за бъдещи цели и не знаем какъв е. Въпреки че BAR адресът е 32 битова стойност, един IO порт е 16 бита и следователно само първите 16 бита от адреса ни трябват.
+{\tt iobase} взимаме от първия \{4.1.4.8\} BAR адрес. Всеки BAR адрес може да съдържа или адрес в паметта или IO порт адрес. Най-младшият бит е 1 когато е IO адрес, а битът директно след него е запазен за бъдещи цели и не знаем какъв е. Въпреки че BAR адресът е 32 битова стойност, един IO порт е 16 бита и следователно само първите 16 бита от адреса ни трябват.
 
 Един от проблемите на този код е че не проверява дали типът на устройството е virtio-serial устройство. Лесно се добавя тази проверка но тъй като никъде във virtio документацията не намерих ``virtio-serial'' устройство и неговия номер не добавих тази проверка. Почти съм сигурен че е номер 3 (console device).
 Втори проблем е че винаги избира първото virtio устройство което намери. Това не е фатално стига да имаме само едно virtio устройство свързано.
 
 \subsubsection{Договаряне с virtio устройство}
-% TODO - virtio_negotiate
+Договарянето е по-лесно отколкото звучи. Драйверът има право само за изключва функции, които не поддържа. Значението на всеки бит е специфично за всеки тип устройство. \{5\}
+\begin{lstlisting}[language=C]
+void virtio_negotiate(u32* supported_features) {
+  *supported_features &= 0x00000000;
+}
+\end{lstlisting}
 
 \subsubsection{Създаване на virtqueue опашките}
-% TODO - virtio_queues - creates and populates queues
+\begin{lstlisting}[language=C]
+void virtio_queues(struct virtio_device* virtio) {
+  u16 iobase = virtio->iobase;
+  for (u32 q_addr=0; q_addr<2; q_addr++) {
+    // get queue size
+    out_word(iobase+0x0E,q_addr);
+    u16 q_size = in_word(iobase+0x0C);
+
+    // allocate queue
+    // formula given by section 2.4.2
+    u32 sizeofBuffers = (sizeof(struct virtq_desc)*q_size);
+    u32 sizeofQueueAvailable = (sizeof(u16)*(3+q_size));
+    u32 sizeofQueueUsed = (sizeof(u16)*3 +
+                    sizeof(struct virtq_used_elem)*q_size);
+#define page_count(bytes) ((bytes+0x0FFF)>>12)
+    u32 firstPageCount = page_count(sizeofBuffers +
+                                    sizeofQueueAvailable);
+    u32 secondPageCount = page_count(sizeofQueueUsed);
+    u32 queuePageCount = firstPageCount+secondPageCount;
+    u8* buf = gimme_memory(queuePageCount);
+    u32 bufPage = (u32)buf >> 12;
+
+    struct virtq* vq = &virtio->queues[q_addr];
+    vq->qsize = q_size;
+    vq->desc = (struct virtq_desc*)buf;
+    vq->avail = (struct virtq_avail*)(buf+sizeofBuffers);
+    vq->used = (struct virtq_used*)(buf+(firstPageCount<<12));
+
+    vq->avail->idx = 0;
+    vq->avail->flags = 0; // 1 if we don't want interrupts
+    vq->used->idx = 0;
+    vq->used->flags = 0;
+
+    if (q_addr == 0) {
+      static char input_buff[1025];
+      virtq_insert(virtio, 0, input_buff, 1023, 2);
+    }
+
+    out_word(iobase+0x0E,q_addr);
+    out_dword(iobase+0x08,bufPage);
+  }
+}
+\end{lstlisting}
+Едно virtio-serial устройство без никакви екстри има две опашки - първата е за вход а втората за изход. Първото което правим за всяка опашка е да вземем нейната големина \{2.4.2\}. След това трябва да заделим достатъчно място в паметта за това. Формулата за изчисление на нужното място се намира в \{2.4.2\}. {\tt buf} става пойнтер към това пространство, а {\tt bufPage} е номерът на "страницата" където се намира пространството.
+След това караме трите пойнтера от {\tt virtq} структурата да сочат към правилните места в буфера и инициализираме стойностите в трите подструктури.
+
+Ако инициализираме първата опашка искаме тя да започне с празен буфер за пълнене на входни данни. Това става чрез {\tt virtq\_insert} което ще обясня след малко.
+
+Последното което трябва да направим за всяка опашка е да кажем на устройството къде се намира. Въпреки че \{4.1.4.8\} нарича полето "Queue address", ние трябва да подадем номерът на първата страница където се намира опашката. Размерът на една страница в нашият случай е 4096 байта но варира.
+
+% TODO - virtq_insert
+
+
+% follow {3.2.1} *and onwards*
+% wth is {2.4.4.3} (VIRTIO_F_ANY_LAYOUT)
+% TODO - queue population
+% TODO - gimme_memory
 
 \subsubsection{Отговаряне на прекъсвания}
 % TODO - set_irq (0x20 already added to it)
