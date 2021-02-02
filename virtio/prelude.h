@@ -1,0 +1,25 @@
+#pragma once
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#define u8 uint8_t
+#define u16 uint16_t
+#define u32 uint32_t
+#define u64 uint64_t
+
+#define mem_barrier __sync_synchronize()
+
+extern void crash(u32 error_code);
+extern void out_byte(u16 port, u8 data);
+extern void out_word(u16 port, u16 data);
+extern void out_dword(u16 port, u32 data);
+extern uint8_t in_byte(u16 port);
+extern u16 in_word(u16 port);
+extern u32 in_dword(u16 port);
+extern void halt();
+extern void nothing();
+
+
+void debug(const char* data);
