@@ -326,7 +326,8 @@ u16 pci_read_config(u32 bus, u32 device, u32 func, u32 offset) {
                      (func << 8) | (offset & 0xfc) |
                      ((u32)0x80000000));
   out_dword(config_address, address);
-  u16 tmp = (u16)((in_dword(config_data) >> ((offset & 2) * 8)) & 0xffff);
+  u16 tmp = (u16)((in_dword(config_data) >>
+                    ((offset & 2) * 8)) & 0xffff);
   return tmp;
 }
 
@@ -436,27 +437,89 @@ void virtio_queues(struct virtio_device* virtio) {
   }
 }
 \end{lstlisting}
-Едно virtio-serial устройство без никакви екстри има две опашки - първата е за вход а втората за изход. Първото което правим за всяка опашка е да вземем нейната големина \{2.4.2\}. След това трябва да заделим достатъчно място в паметта за това. Формулата за изчисление на нужното място се намира в \{2.4.2\}. {\tt buf} става пойнтер към това пространство, а {\tt bufPage} е номерът на "страницата" където се намира пространството.
+Едно virtio-serial устройство без никакви екстри има две опашки - първата е за вход а втората за изход. Първото което правим за всяка опашка е да вземем нейната големина \{2.4.2\}. След това трябва да заделим достатъчно място в паметта за това. Формулата за изчисление на нужното място се намира в \{2.4.2\}. {\tt buf} става пойнтер към това пространство, а {\tt bufPage} е номерът на "страницата" където се намира пространството. Заделянето на нужната памет става чрез {\tt gimme\_memory} което е нещо подобно на {\tt malloc} но много по-просто. Ето я имплементацията:
+\begin{lstlisting}[language=C]
+#define heap_size 32
+static u8 heap_start[heap_size*4096] __attribute__((aligned(4096)));
+
+u8* gimme_memory(u32 pages) {
+  static u32 given_pages = 0;
+  if (pages + given_pages > (u32)heap_size) {
+    crash(0x8BADF00D);
+  }
+  u8* res = heap_start + (given_pages<<12);
+  given_pages += pages;
+  return res;
+}
+\end{lstlisting}
+
 След това караме трите пойнтера от {\tt virtq} структурата да сочат към правилните места в буфера и инициализираме стойностите в трите подструктури.
 
 Ако инициализираме първата опашка искаме тя да започне с празен буфер за пълнене на входни данни. Това става чрез {\tt virtq\_insert} което ще обясня след малко.
 
 Последното което трябва да направим за всяка опашка е да кажем на устройството къде се намира. Въпреки че \{4.1.4.8\} нарича полето "Queue address", ние трябва да подадем номерът на първата страница където се намира опашката. Размерът на една страница в нашият случай е 4096 байта но варира.
 
-% TODO - virtq_insert
+{\tt virtq\_insert} слага буфер в посочена опашка както е описано в \{3.2.1\}. Ето кодът:
+\begin{lstlisting}[language=C]
+void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u8 flags) {
+  u16 iobase = virtio->iobase;
+  struct virtq* queue = &virtio->queues[queue_num];
 
+  // find next free buffer slot
+  // this doesn't do actual searching
+  static u16 buf_index = 0;
+  buf_index++;
+  // set buffer slot's address to message string
+  queue->desc[buf_index].addr = (u32)buf;
+  queue->desc[buf_index].len = len;
+  queue->desc[buf_index].flags = flags;
 
-% follow {3.2.1} *and onwards*
-% wth is {2.4.4.3} (VIRTIO_F_ANY_LAYOUT)
-% TODO - queue population
-% TODO - gimme_memory
+  // add it in the available ring
+  u16 index = (queue->avail->idx) % (queue->qsize);
+  queue->avail->ring[index] = buf_index;
+
+  mem_barrier;
+
+  queue->avail->idx++;
+
+  mem_barrier;
+
+  // notify the device
+  if (driver_ok) {
+      out_word(iobase+0x10,queue_num);
+  }
+
+}
+\end{lstlisting}
+Стъпка 1 е да сложим буферът в свободен дескриптор. Попринцип първо трябва да намерим празен дескриптор но можем и просто да броим колко дескриптори сме използвали ако никога няма да използваме повече от {\tt q\_size} буфери. Стъпка 2 е да сложим индексът на този дескриптор в списъка със свободни дескриптори. Стъпка 3 можем да я пропуснем. Стъпка 4 е да изпълним бариера на паметта, която е дефинирана по следния начин:
+\begin{lstlisting}[language=C]
+#define mem_barrier __sync_synchronize()
+\end{lstlisting}
+Това е интрукция, която казва на компилатора и на процесора да не разместват инструкции свързани с променянето на паметта между бариерата. Това го правим защото ни е важно в какъв ред ще се изпълнят следните инструкции.
+
+Стъпка 5 е да увеличим {\tt idx}. Стъпка 6 е още една бариера. Стъпка 7 е да изпратим съобщение на устройството че сме сложили нов дескриптор в опашката но само ако вече сме приключили с инициализирането на устройството \{3.1.1\}.
+
+% TODO - should the avail and used queues be filled with something during initialization? {2.4.5}
 
 \subsubsection{Отговаряне на прекъсвания}
+% TODO - read about interrupts (more specifically, how to end them)
+% TODO - virtio_handler_prelude
 % TODO - set_irq (0x20 already added to it)
+% TODO - move +0x20 to set_irq
 % TODO - interrupt handler
 
 \subsubsection{``Hello, World!''}
-% TODO - hello_world
+{\tt hello\_world} е последната функция която се извиква и има за цел да изпрати ``Hello, World!''. Това се постига като просто се запише във втората опашка. Мисля че кодът сам говори за себе си:
+\begin{lstlisting}[language=C]
+void hello_world(struct virtio_device* virtio) {
+  const u32 msglen = 16;
+  static const char msg[] = "Hello, World!\n\0\0\0\0\0";
+
+  virtq_insert(virtio, 1, msg, msglen, 0);
+
+  while (1);
+}
+\end{lstlisting}
 
 \subsection{Реализация на RSA}
 %TODO
