@@ -19,6 +19,7 @@ void virtio_negotiate(u32* supported_features);
 void virtio_queues(struct virtio_device* virtio);
 void virtio_handler();
 
+volatile u8 driver_ok = 1;
 volatile struct virtio_device* virtio_for_irq;
 
 #define config_address  0x0CF8
@@ -152,10 +153,13 @@ void virtio_init(struct virtio_device* res) {
   if (status_in & VIRTIO_DEVICE_NEEDS_RESET) {
     debug("THE DEVICE NEEDS A RESET!\n");
   }
+  /*
   status |= VIRTIO_DRIVER_OK;
   debug("after status variable\n");
   out_byte(iobase+0x12, status);
   debug("after status\n");
+  */
+  //driver_ok = 1;
   if (res->queues[1].qsize == 0) {
     debug("IT WAS THE INIT!!\n");
   } else {
@@ -208,7 +212,7 @@ void virtio_queues(struct virtio_device* virtio) {
     vq->used = (struct virtq_used*)(buf+(firstPageCount<<12));
 
     vq->avail->idx = 0;
-    vq->avail->flags = 1; // 1 if we don't want interrupts, 0 otherwise
+    vq->avail->flags = 0; // 1 if we don't want interrupts, 0 otherwise
     vq->used->idx = 0;
     vq->used->flags = 0;
 
@@ -257,9 +261,11 @@ void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, 
   mem_barrier; // section 3.2.1.4.1
 
   // notify the device that there's been a change
-  debug("virtq_insert about to notify\n");
-  out_word(iobase+0x10,1);
-  debug("virtq_insert notified\n");
+  if (driver_ok) {
+    debug("virtq_insert about to notify\n");
+    out_word(iobase+0x10,queue_num);
+    debug("virtq_insert notified\n");
+  }
 
 }
 
@@ -269,7 +275,7 @@ void virtio_handler() {
   debug("IRQ\n");
 
   // notify device it's all good now
-  in_byte(virtio_for_irq->iobase+0x12);
+  // in_byte(virtio_for_irq->iobase+0x12);
   nothing();
 
   disable_interrupts();
