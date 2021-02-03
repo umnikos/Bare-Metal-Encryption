@@ -14,7 +14,7 @@ void kernel_main() {
   generate_keys(n, e, d);
 
   mkii(message);
-  bignum_from_int(message, 0x1337c0de);
+  bignum_from_int(message, 0x0c0def00d);
   write_out("message: ");
   print_bignum(message);
   mkii(encrypted);
