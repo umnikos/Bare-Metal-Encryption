@@ -18,8 +18,11 @@ void kernel_main() {
   crash(0x42424242);
 }
 
+void nothing(void* whatever);
+
 void hello_world(struct virtio_device* virtio) {
   debug("got to hello world!\n");
+
   const u32 msglen = 16;
   static const char msg[] = "Hello, World!\n\0\0\0\0\0";
 

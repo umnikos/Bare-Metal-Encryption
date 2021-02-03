@@ -37,16 +37,19 @@ void fill_idt() {
 
   for (u32 i=0; i<256; i++) {
     struct idt_entry ih;
-    if (i >= 0x20 && i < 0x28) {
-      ih.offset_1 = (u32)idt_handler1 & 0xFFFF;
-      ih.offset_2 = ((u32)idt_handler1 & 0xFFFF0000) >> 16;
-    } else if (i >= 0x28 && i < 0x30) {
-      ih.offset_1 = (u32)idt_handler2 & 0xFFFF;
-      ih.offset_2 = ((u32)idt_handler2 & 0xFFFF0000) >> 16;
-    } else {
-      ih.offset_1 = (u32)idt_handler0 & 0xFFFF;
-      ih.offset_2 = ((u32)idt_handler0 & 0xFFFF0000) >> 16;
+    u32 handler;
+    switch (i) {
+      case 0x20: // PIT
+      case 0x21: // keyboard
+        handler=(u32)idt_handler1;
+        break;
+      default:
+        handler=(u32)idt_handler0;
+        break;
     }
+    ih.offset_1 = (u32)handler & 0xFFFF;
+    ih.offset_2 = ((u32)handler & 0xFFFF0000) >> 16;
+
     ih.zero = 0;
     ih.selector = 0x08;
     ih.type_attr = 0x8E;
@@ -58,7 +61,7 @@ extern void virtio_handler_prelude();
 
 void set_irq(u8 irq) {
   disable_interrupts();
-  idt[irq].offset_1 = (u32)virtio_handler_prelude & 0xFFFF;
-  idt[irq].offset_2 = ((u32)virtio_handler_prelude & 0xFFFF0000) >> 16;
+  idt[irq+0x20].offset_1 = (u32)virtio_handler_prelude & 0xFFFF;
+  idt[irq+0x20].offset_2 = ((u32)virtio_handler_prelude & 0xFFFF0000) >> 16;
   enable_interrupts();
 }

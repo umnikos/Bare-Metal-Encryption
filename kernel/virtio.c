@@ -117,7 +117,7 @@ void virtio_init(struct virtio_device* res) {
   } else {
     debug("IRQ IN UNKNOWN RANGE!\n");
   }
-  set_irq(0x20+irq);
+  set_irq(irq);
   u16 iobase = res->iobase;
   u8 status = VIRTIO_ACKNOWLEDGE;
   // TODO - reset device before initialization (section 4.3.3.3)
