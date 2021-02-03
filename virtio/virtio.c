@@ -1,4 +1,4 @@
-#include "prelude.h"
+#include "../kernel/prelude.h"
 #include "virtio.h"
 
 extern u8* gimme_memory(u32 pages);
@@ -117,7 +117,7 @@ void virtio_init(struct virtio_device* res) {
   } else {
     debug("IRQ IN UNKNOWN RANGE!\n");
   }
-  //set_irq(0x20+irq);
+  set_irq(irq);
   u16 iobase = res->iobase;
   u8 status = VIRTIO_ACKNOWLEDGE;
   // TODO - reset device before initialization (section 4.3.3.3)
@@ -268,3 +268,16 @@ void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, 
   }
 
 }
+
+void disable_interrupts();
+
+void virtio_handler() {
+  debug("IRQ\n");
+
+  // notify device it's all good now
+  // in_byte(virtio_for_irq->iobase+0x12);
+  nothing();
+
+  disable_interrupts();
+}
+

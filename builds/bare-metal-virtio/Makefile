@@ -15,15 +15,20 @@ myos.iso: myos.bin
 	cp myos.bin isodir/boot/
 	grub-mkrescue -o myos.iso isodir
 
-asmfiles = $(patsubst $(home)/kernel/%.asm,%.asm.o,$(wildcard $(home)/kernel/*.asm))
-cfiles = $(patsubst $(home)/kernel/%.c,%.c.o,$(wildcard $(home)/kernel/*.c))
-hfiles = $(wildcard $(home)/kernel/*.h)
+roots = $(home)/kernel $(home)/virtio
+asmfiles = $(foreach R,$(roots),$(patsubst $(R)/%.asm,%.asm.o,$(wildcard $(R)/*.asm)))
+cfiles = $(foreach R,$(roots),$(patsubst $(R)/%.c,%.c.o,$(wildcard $(R)/*.c)))
+hfiles = $(wildcard $(home)/kernel/*.h) $(wildcard $(home)/virtio/*.h)
 
 myos.bin: $(asmfiles) $(cfiles) $(hfiles)
 	$(CC) -g -T $(home)/kernel/linker.ld -o myos.bin -ffreestanding -O2 -nostdlib *.o -lgcc
 %.asm.o: $(home)/kernel/%.asm
 	$(ASSEMBLE) $< -o $@
+%.asm.o: $(home)/virtio/%.asm
+	$(ASSEMBLE) $< -o $@
 %.c.o: $(home)/kernel/%.c
+	$(COMPILE) $< -o $@
+%.c.o: $(home)/virtio/%.c
 	$(COMPILE) $< -o $@
 
 %.asm:; # silence gnu-make implicit rule and prevent circular dependency
