@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 #include "../../encryption/prelude.h"
 
 void write_out(const char* str) {
@@ -23,4 +24,8 @@ void bn_to_str(ii* num_in, char* buf, i size) {
 
 void bn_from_str(char* buf, ii* num, i size) {
   bignum_from_string(num, buf, size);
+}
+
+i get_time() {
+  return time(NULL);
 }

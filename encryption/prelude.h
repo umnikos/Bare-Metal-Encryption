@@ -34,3 +34,4 @@ void read_in(char* buf, i size);
 void bn_to_str(ii* num_in, char* buf, i size);
 void bn_from_str(char* buf, ii* num, i size);
 void i_to_str(i num, char* buf, i size);
+i get_time();

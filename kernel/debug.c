@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include "prelude.h"
  
 /* Check if the compiler thinks you are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -105,11 +106,6 @@ void terminal_write(const char* data, size_t size)
 		terminal_putchar(data[i]);
 }
 
-uint32_t fibonacci(uint32_t i) {
-	if (i < 2) return 1;
-	else return fibonacci(i-1) + fibonacci(i-2);
-}
- 
 void debug(const char* data) 
 {
 	fibonacci(32);

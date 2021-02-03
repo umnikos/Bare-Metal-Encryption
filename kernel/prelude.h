@@ -21,6 +21,8 @@ extern u32 in_dword(u16 port);
 extern void halt();
 extern void waiting();
 extern void nothing();
+u32 fibonacci(u32 i);
+ 
 
 
 void debug(const char* data);

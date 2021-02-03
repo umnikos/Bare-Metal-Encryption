@@ -15,7 +15,7 @@ myos.iso: myos.bin
 	cp myos.bin isodir/boot/
 	grub-mkrescue -o myos.iso isodir
 
-roots = $(home)/kernel $(home)/virtio
+roots = $(home)/kernel $(home)/virtio .
 asmfiles = $(foreach R,$(roots),$(patsubst $(R)/%.asm,%.asm.o,$(wildcard $(R)/*.asm)))
 cfiles = $(foreach R,$(roots),$(patsubst $(R)/%.c,%.c.o,$(wildcard $(R)/*.c)))
 hfiles = $(wildcard $(home)/kernel/*.h) $(wildcard $(home)/virtio/*.h)
@@ -29,6 +29,8 @@ myos.bin: $(asmfiles) $(cfiles) $(hfiles)
 %.c.o: $(home)/kernel/%.c
 	$(COMPILE) $< -o $@
 %.c.o: $(home)/virtio/%.c
+	$(COMPILE) $< -o $@
+%.c.o: %.c
 	$(COMPILE) $< -o $@
 
 %.asm:; # silence gnu-make implicit rule and prevent circular dependency

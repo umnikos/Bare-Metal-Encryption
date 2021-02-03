@@ -1,16 +1,14 @@
 #include "prelude.h"
 
-#include <time.h>
-
 // https://www.freecodecamp.org/news/random-number-generator/
 
 i seed;
 
 void init_rng() {
   // create seed from current time
-  i timestamp = time(NULL);
+  i timestamp = get_time();
   i millis = 0;
-  while (time(NULL) == timestamp) ++millis;
+  while (get_time() == timestamp) ++millis;
   seed = millis * timestamp;
 
   // print debug info

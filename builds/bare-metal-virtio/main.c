@@ -1,5 +1,5 @@
-#include "prelude.h"
-#include "../virtio/virtio.h"
+#include "../../kernel/prelude.h"
+#include "../../virtio/virtio.h"
 
 void terminal_initialize();
 void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u32 flags);
@@ -9,9 +9,7 @@ void hello_world(struct virtio_device *virtio);
 struct virtio_device virtio;
 
 void kernel_main() {
-  /* Initialize terminal interface */
   terminal_initialize();
-  /* Newline support is left as an exercise. */
   debug("-DEBUG-\n");
 
   virtio_init(&virtio);

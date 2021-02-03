@@ -1,13 +1,5 @@
 #include "prelude.h"
-
-// https://wiki.osdev.org/IDT
-struct idt_entry {
-  u16 offset_1; // offset bits 0..15
-  u16 selector; // code segment selector in GDT
-  u8 zero; // full of 0s for legacy reasons
-  u8 type_attr; // settings
-  u16 offset_2; // offset bits 0..16
-} __attribute__((packed));
+#include "idt.h"
 
 extern struct idt_entry idt[];
 extern void idt_handler0();
@@ -55,13 +47,4 @@ void fill_idt() {
     ih.type_attr = 0x8E;
     idt[i] = ih;
   }
-}
-
-extern void virtio_handler_prelude();
-
-void set_irq(u8 irq) {
-  disable_interrupts();
-  idt[irq+0x20].offset_1 = (u32)virtio_handler_prelude & 0xFFFF;
-  idt[irq+0x20].offset_2 = ((u32)virtio_handler_prelude & 0xFFFF0000) >> 16;
-  enable_interrupts();
 }

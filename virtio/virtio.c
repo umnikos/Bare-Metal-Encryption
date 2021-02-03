@@ -1,9 +1,12 @@
 #include "../kernel/prelude.h"
+#include "../kernel/idt.h"
 #include "virtio.h"
 
 extern u8* gimme_memory(u32 pages);
 extern void virtio_handler_prelude();
 extern void set_irq(u8 irq);
+void disable_interrupts();
+void enable_interrupts();
 
 void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u8 flags);
 u16 pci_read_config(u32 bus, u32 device, u32 func, u32 offset);
@@ -269,7 +272,16 @@ void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, 
 
 }
 
-void disable_interrupts();
+extern struct idt_entry idt[];
+
+extern void virtio_handler_prelude();
+
+void set_irq(u8 irq) {
+  disable_interrupts();
+  idt[irq+0x20].offset_1 = (u32)virtio_handler_prelude & 0xFFFF;
+  idt[irq+0x20].offset_2 = ((u32)virtio_handler_prelude & 0xFFFF0000) >> 16;
+  enable_interrupts();
+}
 
 void virtio_handler() {
   debug("IRQ\n");
