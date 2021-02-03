@@ -1,9 +1,6 @@
 #pragma once
+
 #include <stdint.h>
-
-#include <stdlib.h>
-#include <stdio.h>
-
 #define WORD_SIZE 4
 #include "../tiny-bignum-c/bn.h"
 typedef struct bn ii;
@@ -30,3 +27,10 @@ i rng();
 void generate_prime_fermat(i size, ii* res);
 void generate_keys(ii* n, ii* e, ii* d);
 si gcd_extended(ii* a_in, ii* b_in, ii* res);
+
+void write_out(const char* str);
+void flush_out();
+void read_in(char* buf, i size);
+void bn_to_str(ii* num_in, char* buf, i size);
+void bn_from_str(char* buf, ii* num, i size);
+void i_to_str(i num, char* buf, i size);

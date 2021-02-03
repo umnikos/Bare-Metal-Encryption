@@ -2,8 +2,9 @@
 
 void print_bignum(ii* num) {
   char buf[257];
-  bignum_to_string(num, buf, 256);
-  printf("%s\n", buf);
+  bn_to_str(num, buf, 256);
+  write_out(buf);
+  write_out("\n");
 }
 
 int main() {
@@ -15,15 +16,15 @@ int main() {
 
   mkii(message);
   bignum_from_int(message, 0x1337c0de);
-  printf("message: ");
+  write_out("message: ");
   print_bignum(message);
   mkii(encrypted);
   modular_exponentiation(message, e, n, encrypted);
-  printf("encrypted: ");
+  write_out("encrypted: ");
   print_bignum(encrypted);
   mkii(decrypted);
   modular_exponentiation(encrypted, d, n, decrypted);
-  printf("decrypted: ");
+  write_out("decrypted: ");
   print_bignum(decrypted);
 
 }

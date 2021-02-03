@@ -14,9 +14,19 @@ void init_rng() {
   seed = millis * timestamp;
 
   // print debug info
-  printf("timestamp: %u\n", timestamp);
-  printf("millis: %u\n", millis);
-  printf("seed: %u\n", seed);
+  char buf[64];
+  write_out("timestamp: ");
+  i_to_str(timestamp, buf, 64);
+  write_out(buf);
+  write_out("\n");
+  write_out("millis: ");
+  i_to_str(millis, buf, 64);
+  write_out(buf);
+  write_out("\n");
+  write_out("seed: ");
+  i_to_str(seed, buf, 64);
+  write_out(buf);
+  write_out("\n");
 }
 
 // https://en.wikipedia.org/wiki/Xorshift#Example_implementation

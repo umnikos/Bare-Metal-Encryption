@@ -1,4 +1,4 @@
-#include "prelude.h"
+#include "../../encryption/prelude.h"
 
 void write_out(const char* str);
 void read_in(char* buf, i size);
@@ -9,7 +9,7 @@ void bn_to_str(ii num_in, char* buf) {
   i j=0;
   while(!bignum_is_zero(num)) {
     i fourbits = num->array[0] & 0xF;
-    
+    // TODO
   }
 }
 

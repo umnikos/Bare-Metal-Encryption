@@ -11,7 +11,6 @@ byte is_prime_fermat(ii* p) {
   mkii(n);
   for (i j=0; j<fermat_iterations; j++) {
     i rn = rng();
-    //printf("%u\n", rn);
     bignum_from_int(n, rn);
 #ifdef fermat_gcd_test
     gcd(p, n, temp);
@@ -39,8 +38,8 @@ void generate_prime_fermat(i size, ii* res) {
       bignum_from_int(temp2, rng());
       bignum_or(temp1, temp2, res);
     }
-    printf(".");
-    fflush(stdout);
+    write_out(".");
+    flush_out();
   } while (!is_prime_fermat(res));
 }
 
