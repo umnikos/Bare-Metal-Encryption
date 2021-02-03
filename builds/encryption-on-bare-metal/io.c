@@ -70,6 +70,6 @@ i get_time() {
   // TODO - make it not just return seconds, lol
   out_byte(0x70, 0x80 | 0x00);
   fibonacci(10);
-  i time = in_byte(0x71);
-  return time;
+  i seconds = in_byte(0x71);
+  return (seconds << 17) + 17;
 }
