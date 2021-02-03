@@ -16,7 +16,7 @@ myos.iso: myos.bin
 	cp myos.bin isodir/boot/
 	grub-mkrescue -o myos.iso isodir
 
-roots = $(home)/kernel $(home)/virtio $(home)/encryption $(home)/tiny-bignum-c .
+roots = $(home)/kernel $(home)/encryption $(home)/tiny-bignum-c .
 asmfiles = $(foreach R,$(roots),$(patsubst $(R)/%.asm,%.asm.o,$(wildcard $(R)/*.asm)))
 cfiles = $(foreach R,$(roots),$(patsubst $(R)/%.c,%.c.o,$(wildcard $(R)/*.c)))
 hfiles = $(wildcard $(home)/kernel/*.h) $(wildcard $(home)/virtio/*.h)
@@ -27,15 +27,11 @@ myos.bin: $(asmfiles) $(cfiles) $(hfiles)
 	$(ASSEMBLE) $< -o $@
 %.asm.o: $(home)/encryption/%.asm
 	$(ASSEMBLE) $< -o $@
-%.asm.o: $(home)/virtio/%.asm
-	$(ASSEMBLE) $< -o $@
 %.asm.o: %.asm
 	$(ASSEMBLE) $< -o $@
 %.c.o: $(home)/kernel/%.c
 	$(COMPILE) $< -o $@
 %.c.o: $(home)/encryption/%.c
-	$(COMPILE) $< -o $@
-%.c.o: $(home)/virtio/%.c
 	$(COMPILE) $< -o $@
 %.c.o: $(home)/tiny-bignum-c/%.c
 	$(COMPILE) $< -o $@

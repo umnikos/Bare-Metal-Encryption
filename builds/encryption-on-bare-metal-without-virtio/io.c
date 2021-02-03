@@ -1,6 +1,9 @@
 #include "../../encryption/prelude.h"
 #include "../../kernel/prelude.h"
-#include "../../virtio/virtio.h"
+
+void write_out(const char* str) {
+  debug(str);
+}
 
 void flush_out() {
   return;
