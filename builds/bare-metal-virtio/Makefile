@@ -36,10 +36,8 @@ myos.bin: $(asmfiles) $(cfiles) $(hfiles)
 %.asm:; # silence gnu-make implicit rule and prevent circular dependency
 
 
-qemu = qemu-system-i386 -D ./qemu.log -s -device virtio-serial -chardev socket,path=/tmp/foo,server,nowait,id=foo -device virtserialport,chardev=foo,name=org.fedoraproject.port.0 -cdrom myos.iso
-# qemu = qemu-system-i386 -D ./qemu.log -s -device virtserialport,chardev=foo,name=org.fedoraproject.port.0 -cdrom myos.iso
-# qemu = qemu-system-i386 -D ./qemu.log -s -device virtio-serial -chardev socket,path=/tmp/foo,server,id=foo -cdrom myos.iso
-# qemu = qemu-system-i386 -D ./qemu.log -s -device virtio-serial -chardev socket,path=/tmp/foo,server,nowait,id=foo -chardev socket,path=/tmp/bar,server,nowait,id=bar -device virtioconsole,chardev=foo,name=org.fedoraproject.console.foo -device virtioconsole,chardev=bar,name=org.fedoraproject.console.bar -cdrom myos.iso
+VIRTIOSTUFF=-device virtio-serial -chardev socket,path=/tmp/foo,server,nowait,id=foo -device virtserialport,chardev=foo,name=org.fedoraproject.port.0
+qemu = qemu-system-i386 -D ./qemu.log -s $(VIRTIOSTUFF) -cdrom myos.iso
 socat = socat /tmp/foo -
 # could not get radare2 to break at a breakpoint
 # r2 -b32 -e dbg.hwbp=false -e asm.bits=32 -e bin.baddr=0x00100000 -e dbg.exe.path=myos.bin -d gdb://localhost:1234
