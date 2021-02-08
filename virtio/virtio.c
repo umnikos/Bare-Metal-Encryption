@@ -75,6 +75,9 @@ void pci_find_virtio(struct virtio_device* result) {
       if (deviceid >= 0x1000 &&
           deviceid <= 0x103F && // search only for transitional virtio devices
           pci_read_vendor(bus,device) == 0x1AF4) {
+        if (pci_read_subsystem(bus,device) != 3) {
+          crash("DEVICE ID IS NOT 3");
+        }
         result->bus = bus;
         result->device = device;
         result->iobase = pci_read_bar(bus, device, 0) & 0xFFFC; // we only take the bottom word for some reason
@@ -83,10 +86,8 @@ void pci_find_virtio(struct virtio_device* result) {
       }
     }
   }
-  debug("NO VIRTIO DEVICE FOUND");
   // if nothing has been found then there's nothing to do but hang
-  halt();
-  while (1); // gets rid of compiler warning
+  crash("NO VIRTIO DEVICE FOUND");
 }
 
 
@@ -109,16 +110,16 @@ void virtio_init(struct virtio_device* res) {
    * bar1 = 1000
    * 0001 0000 0000 0000
    */
-  debug("start debug\n");
+  debug("start init\n");
   pci_find_virtio(res);
   virtio_for_irq = res;
   u8 irq = pci_read_irq(res->bus, res->device);
   if (irq < 8) {
-    debug("IRQ IN FIRST RANGE!\n");
+    crash("IRQ IN FIRST RANGE!\n");
   } else if (irq >= 8 && irq < 16) {
     debug("irq in second range\n");
   } else {
-    debug("IRQ IN UNKNOWN RANGE!\n");
+    crash("IRQ IN UNKNOWN RANGE!\n");
   }
   set_irq(irq);
   u16 iobase = res->iobase;
@@ -126,7 +127,7 @@ void virtio_init(struct virtio_device* res) {
   // TODO - reset device before initialization (section 4.3.3.3)
   u8 status_in = in_byte(iobase+0x12);
   if (status_in & VIRTIO_DEVICE_NEEDS_RESET) {
-    debug("THE DEVICE NEEDS A RESET!\n");
+    crash("THE DEVICE NEEDS A RESET!\n");
   }
 
   out_byte(iobase+0x12, status);
@@ -143,10 +144,9 @@ void virtio_init(struct virtio_device* res) {
   debug("before check\n");
   if ((in_byte(iobase+0x12) & VIRTIO_FEATURES_OK) == 0) {
     // the negotiations have failed!
-    debug("FAILED NEGOTIATIONS\n");
     status |= VIRTIO_FAILED;
     out_byte(iobase+0x12, status);
-    crash(0xBABADEAD);
+    crash("FAILED NEGOTIATIONS");
   }
   debug("after check\n");
   */
@@ -154,7 +154,7 @@ void virtio_init(struct virtio_device* res) {
   debug("after queues\n");
   status_in = in_byte(iobase+0x12);
   if (status_in & VIRTIO_DEVICE_NEEDS_RESET) {
-    debug("THE DEVICE NEEDS A RESET!\n");
+    crash("THE DEVICE NEEDS A RESET!\n");
   }
   /*
   status |= VIRTIO_DRIVER_OK;
@@ -163,12 +163,7 @@ void virtio_init(struct virtio_device* res) {
   debug("after status\n");
   */
   //driver_ok = 1;
-  if (res->queues[1].qsize == 0) {
-    debug("IT WAS THE INIT!!\n");
-  } else {
-    debug("qsize doesn't become zero at init either...\n");
-  }
-  debug("end debug\n");
+  debug("end init\n");
 }
 
 void virtio_negotiate(u32* supported_features) {
@@ -193,7 +188,7 @@ void virtio_queues(struct virtio_device* virtio) {
     out_word(iobase+0x0E,q_addr);
     u16 q_size = in_word(iobase+0x0C);
     if (q_size == 0) {
-      crash(0x01010101);
+      crash("QSIZE IS 0");
     }
 
     // allocate queue
@@ -252,7 +247,7 @@ void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, 
 
   // add it in the available ring
   if (queue->qsize == 0) {
-    debug("ZERO, BAKAAA!!!\n");
+    crash("QSIZE IS ZERO");
   }
   u16 index = (queue->avail->idx) % (queue->qsize);
   debug("virtq_insert calculated index\n");

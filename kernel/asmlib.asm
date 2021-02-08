@@ -4,11 +4,6 @@ extern fibonacci
 fibonacci_delay equ 10
 ; TODO - add fibonacci delay to every out function
 
-extern halt
-global crash                                    ; mov_to_eax(uint32_t val)
-crash:          mov eax, dword [esp+4]
-                jmp halt
-
 global nothing
 nothing:        ret                             ; for debugging purposes
 

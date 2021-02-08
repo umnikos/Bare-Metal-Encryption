@@ -11,14 +11,13 @@
 
 #define mem_barrier __sync_synchronize()
 
-extern void crash(u32 error_code);
+extern void crash(const char* msg);
 extern void out_byte(u16 port, u8 data);
 extern void out_word(u16 port, u16 data);
 extern void out_dword(u16 port, u32 data);
 extern uint8_t in_byte(u16 port);
 extern u16 in_word(u16 port);
 extern u32 in_dword(u16 port);
-extern void halt();
 extern void waiting();
 extern void nothing();
 u32 fibonacci(u32 i);

@@ -14,7 +14,7 @@ void kernel_main() {
 
   virtio_init(&virtio);
   hello_world(&virtio);
-  crash(0x42424242);
+  crash("MAIN FINISHED");
 }
 
 void nothing(void* whatever);
