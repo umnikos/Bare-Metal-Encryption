@@ -27,7 +27,7 @@ struct virtq_avail {
 
 struct virtq_used_elem {
   uint32_t id; // index of start of used descriptor chain. uint32_t for padding reasons
-  uint32_t len; // total number of bytes written to buffer
+  uint32_t len; // total number of bytes written to buffer. should be ignored for transitional devices!
 };
 
 // used header

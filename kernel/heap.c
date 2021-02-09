@@ -1,7 +1,7 @@
 #include "prelude.h"
 
 #define heap_size 32
-static u8 heap_start[heap_size*4096] __attribute__((aligned(4096)));
+static u8 heap_start[heap_size*4096] __attribute__((aligned(4096))) = {0};
 
 u8* gimme_memory(u32 pages) {
   static u32 given_pages = 0;

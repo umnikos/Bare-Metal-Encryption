@@ -156,13 +156,13 @@ void virtio_init(struct virtio_device* res) {
   if (status_in & VIRTIO_DEVICE_NEEDS_RESET) {
     crash("THE DEVICE NEEDS A RESET!\n");
   }
-  /*
+
   status |= VIRTIO_DRIVER_OK;
   debug("after status variable\n");
   out_byte(iobase+0x12, status);
   debug("after status\n");
-  */
-  //driver_ok = 1;
+
+  driver_ok = 1;
   debug("end init\n");
 }
 
