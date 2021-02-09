@@ -33,14 +33,14 @@ void fill_idt() {
     switch (i) {
       case 0x20: // PIT
       case 0x21: // keyboard
-        handler=(u32)idt_handler1;
+        handler=(uptr)idt_handler1;
         break;
       default:
-        handler=(u32)idt_handler0;
+        handler=(uptr)idt_handler0;
         break;
     }
-    ih.offset_1 = (u32)handler & 0xFFFF;
-    ih.offset_2 = ((u32)handler & 0xFFFF0000) >> 16;
+    ih.offset_1 = handler & 0xFFFF;
+    ih.offset_2 = (handler & 0xFFFF0000) >> 16;
 
     ih.zero = 0;
     ih.selector = 0x08;

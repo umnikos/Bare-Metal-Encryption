@@ -8,6 +8,7 @@
 #define u16 uint16_t
 #define u32 uint32_t
 #define u64 uint64_t
+#define uptr uintptr_t
 
 #define mem_barrier __sync_synchronize()
 
@@ -21,7 +22,6 @@ extern u32 in_dword(u16 port);
 extern void waiting();
 extern void nothing();
 u32 fibonacci(u32 i);
- 
 
 
 void debug(const char* data);

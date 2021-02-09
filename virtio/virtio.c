@@ -200,7 +200,7 @@ void virtio_queues(struct virtio_device* virtio) {
     u32 secondPageCount = page_count(sizeofQueueUsed);
     u32 queuePageCount = firstPageCount+secondPageCount;
     u8* buf = gimme_memory(queuePageCount);
-    u32 bufPage = (u32)buf >> 12;
+    u32 bufPage = (uptr)buf >> 12;
 
     struct virtq* vq = &virtio->queues[q_addr];
     vq->qsize = q_size;
@@ -237,7 +237,7 @@ void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, 
   debug("virtq_insert started\n");
 
   // set buffer slot's address to message string
-  queue->desc[buf_index].addr = (u32)buf;
+  queue->desc[buf_index].addr = (uptr)buf;
   debug("virtq_insert address\n");
   queue->desc[buf_index].len = len;
   debug("virtq_insert length\n");
@@ -247,6 +247,7 @@ void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, 
   // add it in the available ring
   if (queue->qsize == 0) {
     crash("QSIZE IS ZERO");
+    return;
   }
   u16 index = (queue->avail->idx) % (queue->qsize);
   debug("virtq_insert calculated index\n");
@@ -272,8 +273,8 @@ extern void virtio_handler_prelude();
 
 void set_irq(u8 irq) {
   disable_interrupts();
-  idt[irq+0x20].offset_1 = (u32)virtio_handler_prelude & 0xFFFF;
-  idt[irq+0x20].offset_2 = ((u32)virtio_handler_prelude & 0xFFFF0000) >> 16;
+  idt[irq+0x20].offset_1 = (u32)(uptr)virtio_handler_prelude & 0xFFFF;
+  idt[irq+0x20].offset_2 = ((u32)(uptr)virtio_handler_prelude & 0xFFFF0000) >> 16;
   enable_interrupts();
 }
 

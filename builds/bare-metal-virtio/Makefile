@@ -64,3 +64,5 @@ clean:
 	rm -f *.bin
 	rm -f *.o
 
+scan:
+	scan-build-7 --use-cc=$(CC) make
