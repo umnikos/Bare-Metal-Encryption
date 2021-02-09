@@ -70,7 +70,6 @@ void pci_find_virtio(struct virtio_device* result) {
       // there should be a subsystem check
       // but I don't know what the subsystem number of virtio-serial is
       // (it happens to be 3)
-      // TODO - check if device is really a virtio-serial device
       // TODO - support for more than one virtio device
       if (deviceid >= 0x1000 &&
           deviceid <= 0x103F && // search only for transitional virtio devices
@@ -124,7 +123,7 @@ void virtio_init(struct virtio_device* res) {
   set_irq(irq);
   u16 iobase = res->iobase;
   u8 status = VIRTIO_ACKNOWLEDGE;
-  // TODO - reset device before initialization (section 4.3.3.3)
+  // FIXME - reset device before initialization (section 4.3.3.3)
   u8 status_in = in_byte(iobase+0x12);
   if (status_in & VIRTIO_DEVICE_NEEDS_RESET) {
     crash("THE DEVICE NEEDS A RESET!\n");
@@ -231,7 +230,7 @@ void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, 
   u16 iobase = virtio->iobase;
   struct virtq* queue = &virtio->queues[queue_num];
   // find next free buffer slot
-  // TODO - actual searching
+  // TODO - actual searching for empty descriptors
   static u16 buf_index = 0;
   buf_index++;
 

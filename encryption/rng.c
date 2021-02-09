@@ -28,7 +28,7 @@ void init_rng() {
 }
 
 // https://en.wikipedia.org/wiki/Xorshift#Example_implementation
-// TODO - IMPLEMENT SOMETHING THAT ISN'T BAD.
+// FIXME - XORSHIFT IS BAD
 i rng() {
   seed ^= seed << 13;
   seed ^= seed >> 17;

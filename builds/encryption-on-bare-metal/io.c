@@ -64,7 +64,7 @@ void bn_from_str(char* buf, ii* num, i size) {
 
 i get_time() {
   // https://wiki.osdev.org/CMOS#The_Real-Time_Clock
-  // TODO - make it not just return seconds, lol
+  // FIXME - make it not just return seconds, lol
   out_byte(0x70, 0x80 | 0x00);
   fibonacci(10);
   i seconds = in_byte(0x71);

@@ -3,7 +3,7 @@ SHELL := /bin/bash
 home=../..
 CC = i686-elf-gcc
 AS = nasm
-# TODO - no Wno-unused-parameter
+# FIXME - remove Wno-unused-parameter
 COMPILE = $(CC) -g -std=gnu99 -ffreestanding -DBN_NO_ASSERT -DBN_NO_STDIO -O2 -Wall -Wextra -Werror -Wno-unused-parameter -c
 ASSEMBLE = $(AS) -g -f elf32 -Wall -Werror
 
