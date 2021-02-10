@@ -33,3 +33,4 @@ void kernel_main() {
 }
 
 #include "io.c"
+#include "misc.c"

@@ -28,3 +28,4 @@ void kernel_main() {
 }
 
 #include "io-vga.c"
+#include "misc.c"

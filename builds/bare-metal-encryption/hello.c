@@ -32,3 +32,4 @@ void hello_world(struct virtio_device* virtio) {
 }
 
 #include "io.c"
+#include "misc.c"
