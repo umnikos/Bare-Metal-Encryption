@@ -8,6 +8,7 @@ extern void set_irq(u8 irq);
 void disable_interrupts();
 void enable_interrupts();
 
+void i_to_str(u32 num, char* buf, u32 size);
 void virtq_insert(struct virtio_device* virtio, u16 queue_num, char const* buf, u32 len, u16 flags);
 u16 pci_read_config(u32 bus, u32 device, u32 func, u32 offset);
 u16 pci_read_headertype(u32 bus, u32 device);
@@ -112,7 +113,13 @@ void virtio_init(struct virtio_device* res) {
   debug("start init\n");
   pci_find_virtio(res);
   virtio_for_irq = res;
+
   u8 irq = pci_read_irq(res->bus, res->device);
+  debug("irq is: ");
+  char debug_buf[65];
+  i_to_str((u32)irq, debug_buf, 63);
+  debug(debug_buf);
+  debug("\n");
   if (irq < 8) {
     crash("IRQ IN FIRST RANGE!\n");
   } else if (irq >= 8 && irq < 16) {
@@ -121,6 +128,7 @@ void virtio_init(struct virtio_device* res) {
     crash("IRQ IN UNKNOWN RANGE!\n");
   }
   set_irq(irq);
+
   u16 iobase = res->iobase;
   u8 status = VIRTIO_ACKNOWLEDGE;
   // FIXME - reset device before initialization (section 4.3.3.3)

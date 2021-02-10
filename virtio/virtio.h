@@ -10,3 +10,4 @@ struct virtio_device {
 };
 
 void virtio_init(struct virtio_device* virtio);
+void virtq_insert(struct virtio_device* virtio, u16 queue_num, char const* buf, u32 len, u16 flags);

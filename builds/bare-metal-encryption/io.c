@@ -4,8 +4,6 @@
 
 // --- IO ---
 
-void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u16 flags);
-
 void write_out(const char* str) {
   i len = 0;
   while (str[len] != '\0') {

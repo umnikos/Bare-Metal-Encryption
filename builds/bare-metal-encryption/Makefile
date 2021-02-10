@@ -4,12 +4,13 @@ home=../..
 CC = i686-elf-gcc
 AS = nasm
 # FIXME - remove Wno-unused-parameter
-COMPILE = $(CC) -g -std=gnu99 -ffreestanding -DBN_NO_ASSERT -DBN_NO_STDIO -O0 -Wall -pedantic -Wextra -Werror -Wconversion -Wno-unused-parameter -c
+COMPILE = $(CC) -g -std=gnu99 -ffreestanding -DBN_NO_ASSERT -DBN_NO_STDIO -O0 -Wall -Wextra -Werror -Wconversion -Wno-unused-parameter -c
 ASSEMBLE = $(AS) -g -f elf32 -Wall -Werror
 
 main: clean main.c.o build;
 hello: clean hello.c.o build;
 main-vga: clean main-vga.c.o build;
+serial-test: clean serial-test.c.o build;
 
 build: myos.iso;
 
@@ -20,7 +21,7 @@ myos.iso: myos.bin
 	cp myos.bin isodir/boot/
 	grub-mkrescue -o myos.iso isodir
 
-roots = $(home)/kernel $(home)/virtio $(home)/encryption $(home)/tiny-bignum-c
+roots = $(home)/kernel $(home)/virtio $(home)/encryption $(home)/tiny-bignum-c $(home)/serial
 asmfiles = $(foreach R,$(roots),$(patsubst $(R)/%.asm,%.asm.o,$(wildcard $(R)/*.asm)))
 cfiles = $(foreach R,$(roots),$(patsubst $(R)/%.c,%.c.o,$(wildcard $(R)/*.c)))
 hfiles = $(wildcard $(home)/kernel/*.h) $(wildcard $(home)/virtio/*.h)
@@ -38,6 +39,8 @@ myos.bin: $(asmfiles) $(cfiles) $(hfiles)
 %.c.o: $(home)/kernel/%.c
 	$(COMPILE) $< -o $@
 %.c.o: $(home)/encryption/%.c
+	$(COMPILE) $< -o $@
+%.c.o: $(home)/serial/%.c
 	$(COMPILE) $< -o $@
 %.c.o: $(home)/virtio/%.c
 	$(COMPILE) $< -o $@
