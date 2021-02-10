@@ -8,13 +8,13 @@ extern void set_irq(u8 irq);
 void disable_interrupts();
 void enable_interrupts();
 
-void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u16 flags);
+void virtq_insert(struct virtio_device* virtio, u16 queue_num, char const* buf, u32 len, u16 flags);
 u16 pci_read_config(u32 bus, u32 device, u32 func, u32 offset);
 u16 pci_read_headertype(u32 bus, u32 device);
 u16 pci_read_vendor(u32 bus, u32 device);
 u16 pci_read_deviceid(u32 bus, u32 device);
 u16 pci_read_subsystem(u32 bus, u32 device);
-u16 pci_read_irq(u32 bus, u32 device);
+u8 pci_read_irq(u32 bus, u32 device);
 u32 pci_read_bar(u32 bus, u32 device, u32 number);
 void virtio_init(struct virtio_device* virtio);
 void pci_find_virtio(struct virtio_device* virtio);
@@ -53,14 +53,14 @@ u16 pci_read_subsystem(u32 bus, u32 device) {
   return pci_read_config(bus,device,0,0x2E);
 }
 
-u16 pci_read_irq(u32 bus, u32 device) {
-  return pci_read_config(bus,device,0,0x3C) & 0x00FF;
+u8 pci_read_irq(u32 bus, u32 device) {
+  return (u8)pci_read_config(bus,device,0,0x3C);
 }
 
 u32 pci_read_bar(u32 bus, u32 device, u32 number) {
   u16 bottom = pci_read_config(bus,device,0, 0x10 + number*4);
   u16 top = pci_read_config(bus,device,0, 0x12 + number*4);
-  return (top<<16)+bottom;
+  return ((u32)top<<16)+(u32)bottom;
 }
 
 void pci_find_virtio(struct virtio_device* result) {
@@ -179,7 +179,7 @@ void virtio_queues(struct virtio_device* virtio) {
   debug("start virtio_queues\n");
   u16 iobase = virtio->iobase;
   // section 5.3.2 tells us what the two queues are
-  for (u32 q_addr=0; q_addr<2; q_addr++) {
+  for (u16 q_addr=0; q_addr<2; q_addr++) {
 
     // sections 2.4 and onward describes the queue layout
 
@@ -226,7 +226,7 @@ void virtio_queues(struct virtio_device* virtio) {
   debug("end virtio_queues\n");
 }
 
-void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u16 flags) {
+void virtq_insert(struct virtio_device* virtio, u16 queue_num, char const* buf, u32 len, u16 flags) {
   u16 iobase = virtio->iobase;
   struct virtq* queue = &virtio->queues[queue_num];
   // find next free buffer slot
@@ -273,8 +273,8 @@ extern void virtio_handler_prelude();
 
 void set_irq(u8 irq) {
   disable_interrupts();
-  idt[irq+0x20].offset_1 = (u32)(uptr)virtio_handler_prelude & 0xFFFF;
-  idt[irq+0x20].offset_2 = ((u32)(uptr)virtio_handler_prelude & 0xFFFF0000) >> 16;
+  idt[irq+0x20].offset_1 = (u16)(uptr)virtio_handler_prelude;
+  idt[irq+0x20].offset_2 = (u16)((uptr)virtio_handler_prelude >> 16);
   enable_interrupts();
 }
 

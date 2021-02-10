@@ -4,8 +4,7 @@ home=../..
 CC = i686-elf-gcc
 AS = nasm
 # FIXME - remove Wno-unused-parameter
-# TODO - add -Wconversion
-COMPILE = $(CC) -g -std=gnu99 -ffreestanding -DBN_NO_ASSERT -DBN_NO_STDIO -O0 -Wall -Wextra -Werror -Wno-unused-parameter -c
+COMPILE = $(CC) -g -std=gnu99 -ffreestanding -DBN_NO_ASSERT -DBN_NO_STDIO -O0 -Wall -pedantic -Wextra -Werror -Wconversion -Wno-unused-parameter -c
 ASSEMBLE = $(AS) -g -f elf32 -Wall -Werror
 
 main: clean main.c.o build;
@@ -43,7 +42,7 @@ myos.bin: $(asmfiles) $(cfiles) $(hfiles)
 %.c.o: $(home)/virtio/%.c
 	$(COMPILE) $< -o $@
 %.c.o: $(home)/tiny-bignum-c/%.c
-	$(COMPILE) $< -o $@
+	$(COMPILE) -Wno-conversion $< -o $@
 %.c.o: %.c
 	$(COMPILE) $< -o $@
 

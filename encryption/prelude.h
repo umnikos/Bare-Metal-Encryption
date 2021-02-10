@@ -13,6 +13,7 @@ typedef struct bn ii;
 
 typedef int32_t si;
 typedef uint32_t i;
+typedef uint64_t li;
 typedef uint8_t byte;
 #define true 1
 #define false 0

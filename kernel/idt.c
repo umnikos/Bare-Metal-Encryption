@@ -39,8 +39,8 @@ void fill_idt() {
         handler=(uptr)idt_handler0;
         break;
     }
-    ih.offset_1 = handler & 0xFFFF;
-    ih.offset_2 = (handler & 0xFFFF0000) >> 16;
+    ih.offset_1 = (u16)handler;
+    ih.offset_2 = (u16)(handler >> 16);
 
     ih.zero = 0;
     ih.selector = 0x08;

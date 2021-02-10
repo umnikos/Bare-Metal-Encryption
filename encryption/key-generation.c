@@ -40,20 +40,20 @@ void generate_keys(ii* n, ii* e, ii* d) {
   // ==> k = b-x
   mkii(k);
   write_out("x: ");
-  i_to_str(x, buf, 64);
+  i_to_str((i)x, buf, 64);
   write_out(buf);
   write_out("\n");
   if (x>=0) {
     // x is positive
-    bignum_from_int(temp1, x);
+    bignum_from_int(temp1, (li)x);
     bignum_sub(e, temp1, k);
   } else {
     // x is negative
     write_out("-x: ");
-    i_to_str(-x, buf, 64);
+    i_to_str((i)-x, buf, 64);
     write_out(buf);
     write_out("\n");
-    bignum_from_int(temp1, -x);
+    bignum_from_int(temp1, (li)-x);
     bignum_add(e, temp1, k);
   }
 
