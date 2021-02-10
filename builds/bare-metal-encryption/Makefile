@@ -3,11 +3,16 @@ SHELL := /bin/bash
 home=../..
 CC = i686-elf-gcc
 AS = nasm
-# TODO - no Wno-unused-parameter
-COMPILE = $(CC) -g -std=gnu99 -ffreestanding -DBN_NO_ASSERT -DBN_NO_STDIO -O2 -Wall -Wextra -Werror -Wno-unused-parameter -c
+# FIXME - remove Wno-unused-parameter
+# TODO - add -Wconversion
+COMPILE = $(CC) -g -std=gnu99 -ffreestanding -DBN_NO_ASSERT -DBN_NO_STDIO -O0 -Wall -Wextra -Werror -Wno-unused-parameter -c
 ASSEMBLE = $(AS) -g -f elf32 -Wall -Werror
 
-all: clean myos.iso
+main: clean main.c.o build;
+hello: clean hello.c.o build;
+main-vga: clean main-vga.c.o build;
+
+build: myos.iso;
 
 myos.iso: myos.bin
 	if test -d isodir; then rm -r isodir; fi
@@ -16,22 +21,26 @@ myos.iso: myos.bin
 	cp myos.bin isodir/boot/
 	grub-mkrescue -o myos.iso isodir
 
-roots = $(home)/kernel $(home)/encryption $(home)/tiny-bignum-c .
+roots = $(home)/kernel $(home)/virtio $(home)/encryption $(home)/tiny-bignum-c
 asmfiles = $(foreach R,$(roots),$(patsubst $(R)/%.asm,%.asm.o,$(wildcard $(R)/*.asm)))
 cfiles = $(foreach R,$(roots),$(patsubst $(R)/%.c,%.c.o,$(wildcard $(R)/*.c)))
 hfiles = $(wildcard $(home)/kernel/*.h) $(wildcard $(home)/virtio/*.h)
 
 myos.bin: $(asmfiles) $(cfiles) $(hfiles)
-	$(CC) -g -T $(home)/kernel/linker.ld -o myos.bin -ffreestanding -O2 -nostdlib *.o -lgcc
+	$(CC) -g -T $(home)/kernel/linker.ld -o myos.bin -ffreestanding -O0 -nostdlib *.o -lgcc
 %.asm.o: $(home)/kernel/%.asm
 	$(ASSEMBLE) $< -o $@
 %.asm.o: $(home)/encryption/%.asm
+	$(ASSEMBLE) $< -o $@
+%.asm.o: $(home)/virtio/%.asm
 	$(ASSEMBLE) $< -o $@
 %.asm.o: %.asm
 	$(ASSEMBLE) $< -o $@
 %.c.o: $(home)/kernel/%.c
 	$(COMPILE) $< -o $@
 %.c.o: $(home)/encryption/%.c
+	$(COMPILE) $< -o $@
+%.c.o: $(home)/virtio/%.c
 	$(COMPILE) $< -o $@
 %.c.o: $(home)/tiny-bignum-c/%.c
 	$(COMPILE) $< -o $@
@@ -65,7 +74,7 @@ debug: myos.iso
 
 clean:
 	if test -d isodir; then rm -r isodir; fi
-	rm -f *.iso
-	rm -f *.bin
-	rm -f *.o
+	rm -f *.iso *.bin *.o
 
+scan:
+	scan-build-7 --use-cc=$(CC) make

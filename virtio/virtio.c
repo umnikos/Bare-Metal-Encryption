@@ -8,7 +8,7 @@ extern void set_irq(u8 irq);
 void disable_interrupts();
 void enable_interrupts();
 
-void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u8 flags);
+void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u16 flags);
 u16 pci_read_config(u32 bus, u32 device, u32 func, u32 offset);
 u16 pci_read_headertype(u32 bus, u32 device);
 u16 pci_read_vendor(u32 bus, u32 device);
@@ -226,7 +226,7 @@ void virtio_queues(struct virtio_device* virtio) {
   debug("end virtio_queues\n");
 }
 
-void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u8 flags) {
+void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u16 flags) {
   u16 iobase = virtio->iobase;
   struct virtq* queue = &virtio->queues[queue_num];
   // find next free buffer slot

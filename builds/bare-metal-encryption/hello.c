@@ -2,7 +2,7 @@
 #include "../../virtio/virtio.h"
 
 void terminal_initialize();
-void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u32 flags);
+void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u16 flags);
 
 void hello_world(struct virtio_device *virtio);
 
@@ -31,3 +31,4 @@ void hello_world(struct virtio_device* virtio) {
   while (1);
 }
 
+#include "io.c"
