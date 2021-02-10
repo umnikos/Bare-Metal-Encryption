@@ -18,6 +18,9 @@ typedef uint8_t byte;
 #define true 1
 #define false 0
 
+void rsa_main();
+void rsa_demo();
+
 void print_bignum(ii* n);
 void exponentiation(ii* b, ii* e, ii* res);
 void modular_exponentiation(ii* b, ii* e, ii* m, ii* res);
