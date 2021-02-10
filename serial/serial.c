@@ -1,6 +1,8 @@
 #include "../kernel/prelude.h"
 #include "serial.h"
 
+void i_to_str(u32 num, char* buf, u32 size);
+
 // https://littleosbook.github.io/#the-serial-ports
 // https://wiki.osdev.org/Serial_Ports#Example_Code
 // https://en.wikibooks.org/wiki/Serial_Programming/8250_UART_Programming
@@ -60,10 +62,17 @@ void serial_initialize() {
       0b00000000);
 }
 
+void serial_send_char(char c) {
+    while ((in_byte(serial_line_status(COM1)) & 0x20) == 0);
+    out_byte(serial_data(COM1), (u8)c);
+}
+
 void serial_send(char* s) {
   for (; *s != '\0'; s++) {
-    while ((in_byte(serial_line_status(COM1)) & 0x20) == 0);
-    out_byte(serial_data(COM1), (u8)*s);
+    if (*s == '\n') {
+      serial_send_char('\r');
+    }
+    serial_send_char(*s);
   }
 }
 
@@ -72,10 +81,25 @@ void serial_receive(char* s, u32 size) {
   while (true) {
     while ((in_byte(serial_line_status(COM1)) & 0x01) == 0);
     *s = (char)in_byte(serial_data(COM1));
+    if (*s == 0x1B) continue;
+
+    char debug_buf[65] = {0};
+    i_to_str((u32)*s, debug_buf, 63);
+    debug(debug_buf);
+    debug("\n");
+
     count++;
-    if (*s == '\n' || count == size) {
+    if (*s == 0x0D || count == size) {
+      serial_send("\n");
       *s = '\0';
       return;
     }
+    serial_send_char(*s);
+    if (*s == 0x08) {
+      serial_send(" \b");
+      s--;
+      s--;
+    }
+    s++;
   }
 }
