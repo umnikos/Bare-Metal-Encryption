@@ -2,10 +2,6 @@
 #include "../../encryption/prelude.h"
 #include "../../virtio/virtio.h"
 
-void read_in(char* buf, i size) {
-  // TODO
-}
-
 const char hex_symbols[16] = "0123456789ABCDEF";
 void i_to_str(i num, char* buf, i size) {
   size--;

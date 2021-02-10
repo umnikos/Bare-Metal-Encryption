@@ -67,7 +67,7 @@ void serial_send_char(char c) {
     out_byte(serial_data(COM1), (u8)c);
 }
 
-void serial_send(char* s) {
+void serial_send(const char* s) {
   for (; *s != '\0'; s++) {
     if (*s == '\n') {
       serial_send_char('\r');
@@ -79,6 +79,11 @@ void serial_send(char* s) {
 void serial_receive(char* s, u32 size) {
   u32 count = 0;
   while (true) {
+    if (count == size) {
+      serial_send("\n");
+      *s = '\0';
+      return;
+    }
     while ((in_byte(serial_line_status(COM1)) & 0x01) == 0);
     *s = (char)in_byte(serial_data(COM1));
     if (*s == 0x1B) continue;
@@ -89,7 +94,7 @@ void serial_receive(char* s, u32 size) {
     debug("\n");
 
     count++;
-    if (*s == 0x0D || count == size) {
+    if (*s == 0x0D) {
       serial_send("\n");
       *s = '\0';
       return;
@@ -99,6 +104,8 @@ void serial_receive(char* s, u32 size) {
       serial_send(" \b");
       s--;
       s--;
+      count--;
+      count--;
     }
     s++;
   }

@@ -1,7 +1,6 @@
 #include "prelude.h"
 
 void generate_keys(ii* n, ii* e, ii* d) {
-  char buf[64];
   mkii(temp1);
   mkii(p);
   mkii(q);
@@ -40,9 +39,7 @@ void generate_keys(ii* n, ii* e, ii* d) {
   // ==> k = b-x
   mkii(k);
   write_out("x: ");
-  i_to_str((i)x, buf, 64);
-  write_out(buf);
-  write_out("\n");
+  print_num((i)x);
   if (x>=0) {
     // x is positive
     bignum_from_int(temp1, (li)x);
@@ -50,9 +47,7 @@ void generate_keys(ii* n, ii* e, ii* d) {
   } else {
     // x is negative
     write_out("-x: ");
-    i_to_str((i)-x, buf, 64);
-    write_out(buf);
-    write_out("\n");
+    print_num((i)-x);
     bignum_from_int(temp1, (li)-x);
     bignum_add(e, temp1, k);
   }

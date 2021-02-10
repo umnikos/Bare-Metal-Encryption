@@ -12,6 +12,10 @@ void write_out(const char* str) {
   virtq_insert(&virtio, 1, str, len, 0);
 }
 
+void read_in(char* buf, i size) {
+  // TODO
+}
+
 void flush_out() {
   return;
 }

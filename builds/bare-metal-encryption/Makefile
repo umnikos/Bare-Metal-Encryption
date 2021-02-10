@@ -8,6 +8,7 @@ COMPILE = $(CC) -g -std=gnu99 -ffreestanding -DBN_NO_ASSERT -DBN_NO_STDIO -O0 -W
 ASSEMBLE = $(AS) -g -f elf32 -Wall -Werror
 
 main: clean main.c.o build;
+main-serial: clean main-serial.c.o build;
 hello: clean hello.c.o build;
 main-vga: clean main-vga.c.o build;
 serial-test: clean serial-test.c.o build;
@@ -65,6 +66,9 @@ run: myos.iso
 	$(qemu) &
 	sleep 1
 	$(socat)
+
+run-serial: myos.iso
+	$(qemu) -serial stdio
 
 debug: myos.iso
 	$(qemu) &

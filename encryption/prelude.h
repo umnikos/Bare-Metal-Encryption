@@ -22,6 +22,7 @@ void rsa_main();
 void rsa_demo();
 
 void print_bignum(ii* n);
+void print_num(i num);
 void exponentiation(ii* b, ii* e, ii* res);
 void modular_exponentiation(ii* b, ii* e, ii* m, ii* res);
 void gcd(ii* a, ii* b, ii* res);

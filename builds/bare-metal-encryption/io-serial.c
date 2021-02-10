@@ -1,11 +1,14 @@
 #include "../../encryption/prelude.h"
-#include "../../kernel/prelude.h"
+#include "../../serial/serial.h"
+
+// --- IO ---
 
 void write_out(const char* str) {
-  debug(str);
+  serial_send(str);
 }
 
 void read_in(char* buf, i size) {
+  serial_receive(buf, (u32)size);
 }
 
 void flush_out() {
