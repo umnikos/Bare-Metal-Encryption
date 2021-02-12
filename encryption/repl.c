@@ -38,7 +38,7 @@ void rsa_main() {
         generate_keys(n,e,d);
         break;
       case '2':
-        // TODO - ADD RANDOM PADDING FOR SECURITY
+        // init_rng(); // for random padding, already done while generating keys
         write_out("message: ");
         read_in(in, max_message);
         s = in;
@@ -54,6 +54,9 @@ void rsa_main() {
             s++;
           }
           if (count == 0) break;
+          bignum_lshift(m, temp1, 8);
+          bignum_from_int(temp2, (li)(rng()&0xFF));
+          bignum_add(temp1, temp2, m);
           modular_exponentiation(m, e, n, temp1);
           bn_to_str(temp1, out, max_message);
           write_out(out);
@@ -83,6 +86,7 @@ void rsa_main() {
                 bignum_rshift(m, temp1, 8);
                 bignum_assign(m, temp1);
               }
+              *(out+max_message-1) = '\0'; // remove random padding
               write_out(ss);
 
               bignum_init(m);
