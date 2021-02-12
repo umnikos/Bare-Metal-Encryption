@@ -100,7 +100,10 @@ void serial_receive(char* s, u32 size) {
       return;
     }
     serial_send_char(*s);
-    if (*s == 0x08) {
+    if (*s == 0x7F) {
+      serial_send("\b");
+    }
+    if (*s == 0x08 || *s == 0x7F) {
       serial_send(" \b");
       s--;
       s--;

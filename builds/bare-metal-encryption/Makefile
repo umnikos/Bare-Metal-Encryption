@@ -3,8 +3,9 @@ SHELL := /bin/bash
 home=../..
 CC = i686-elf-gcc
 AS = nasm
+OPTIMIZATION_LEVEL=-O2
 # FIXME - remove Wno-unused-parameter
-COMPILE = $(CC) -g -std=gnu99 -ffreestanding -DBN_NO_ASSERT -DBN_NO_STDIO -O0 -Wall -Wextra -Werror -Wconversion -Wno-unused-parameter -c
+COMPILE = $(CC) -g -std=gnu99 -ffreestanding -DBN_NO_ASSERT -DBN_NO_STDIO $(OPTIMIZATION_LEVEL) -Wall -Wextra -Werror -Wconversion -Wno-unused-parameter -c
 ASSEMBLE = $(AS) -g -f elf32 -Wall -Werror
 
 main: clean main.c.o build;
@@ -28,7 +29,7 @@ cfiles = $(foreach R,$(roots),$(patsubst $(R)/%.c,%.c.o,$(wildcard $(R)/*.c)))
 hfiles = $(wildcard $(home)/kernel/*.h) $(wildcard $(home)/virtio/*.h)
 
 myos.bin: $(asmfiles) $(cfiles) $(hfiles)
-	$(CC) -g -T $(home)/kernel/linker.ld -o myos.bin -ffreestanding -O0 -nostdlib *.o -lgcc
+	$(CC) -g -T $(home)/kernel/linker.ld -o myos.bin -ffreestanding $(OPTIMIZATION_LEVEL) -nostdlib *.o -lgcc
 %.asm.o: $(home)/kernel/%.asm
 	$(ASSEMBLE) $< -o $@
 %.asm.o: $(home)/encryption/%.asm
