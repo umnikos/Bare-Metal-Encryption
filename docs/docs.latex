@@ -40,9 +40,6 @@
 
 \fontsize{14pt}{20}\selectfont % change font to 14pt
 
-%Преди започване на писането на код проучването се състоеше от четене на книгата "The little book about OS development"\parencite{osbook}, което ми предостави обща представа за това как работи един компютър на ниско ниво и кои части от операционната система ще трябва да създам за да мога да направя приложната част от продукта. След това най-полезният ресурс беше "OSDev.org"\parencite{oswiki}, уики за всичко свързано с писането на операционни системи, което предоставя всички нужни детайли за да напиша кода в действителност. Но при създаването на virtio-serial драйвера гледах и официалната документация на virtio\parencite{virtiodocs} и един блог пост обясняващ вече написан virtio мрежови драйвер\parencite{virtioblogpost}.
-%Общи знания за алгоритъма получих от видео серията "Public Key Cryptography"\parencite{artoftheproblemrsa} от "Art of the Problem". Конкретни детайли намирах в Wikipedia\parencite{wikipedia} защото Wikipedia предоставя много добри и пълни обяснения за каквото и да било свързано с математика.
-
 \include{title-page}
 \include{blank-page}
 \include{intro}
@@ -59,6 +56,7 @@
 
 % table of contents
 \newpage
+\nocite{*} % show all citations even if they weren't cited
 \addcontentsline{toc}{section}{Съдържание}
 \tableofcontents
 
