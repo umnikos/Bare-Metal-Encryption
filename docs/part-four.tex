@@ -1,3 +1,20 @@
 % usage manual (6-10 pages)
 \section{Ръководство на потребителя}
-\subsection{Инсталация}
+\subsection{Компилиране на документацията}
+Документацията е написана на \LaTeX{}. Намира се в папка {\tt docs} и най-лесно се компилира със следните команди (за линукс):
+\begin{lstlisting}
+pdflatex docs.latex
+bibtex docs
+pdflatex docs.latex
+pdflatex docs.latex
+\end{lstlisting}
+
+\subsection{Компилиране на приложението}
+Различни конфигурации на кода се намират в папка {\tt builds}. Пример (за линукс):
+\begin{lstlisting}
+cd docs/bare-metal-encryption
+make main-serial
+make run-serial
+\end{lstlisting}
+Последната команда е за изпълняване на кода чрез QEMU. За компилация е нужно да имате инсталиран i686 C cross-compiler.\footnote{Ако не ви се занимава да компилирате gcc като cross-compiler може да използвате {\tt zig cc -target i386-freestanding} като C компилатор, но не успях да постигна успех при свързването на изпълнимия файл по този начин.}
+
