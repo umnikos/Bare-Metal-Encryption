@@ -220,9 +220,9 @@ void kernel_main() {
 \end{lstlisting}
 
 \subsection{Реализация на virtio-serial драйвер}
-За тази част от документацията ще използвам ``\{\textit{текст}\}'' за да означавам части от virtio документацията.\parencite{virtiodocs}
+За тази част от документацията ще използвам ``\{\textit{номер/име}\}'' за да означавам части от virtio документацията.\parencite{virtiodocs}
 
-Приключението започва във функцията {\tt virtio\_init}, която се извиква от {\tt kernel\_main} и има за дел да намери и инициализира virtio-serial устройството. Преди да покажа кода на функцията ще покажа нейния тип:
+Приключението започва във функцията {\tt virtio\_init}, която се извиква от функцията {\tt kernel\_main} и има за дел да намери и инициализира virtio-serial устройството. Преди да покажа кода на функцията ще покажа нейния тип:
 \begin{lstlisting}[language=C]
 struct virtio_device {
   u32 bus;
@@ -235,7 +235,7 @@ void virtio_init(struct virtio_device* virtio);
 \end{lstlisting}
 Поради липсата на {\tt malloc}, {\tt virtio\_init} приема пойнтер към празна {\tt virtio\_device} структура, която да бъде напълнена.
 
-{\tt bus} и {\tt device} са резултатите от търсенето по PCI. Те са достатъчни че да се намери {\tt iobase} но съм го включил в структурата за улеснение. {\tt struct virtq queues[2]} са двете virtio опашки, структурата за които може да намерите в \{Appendix A. virtio\_queue.h\} но за пълнота на тази документация ги представям и тук:
+{\tt bus} и {\tt device} са резултатите от търсенето по PCI. Те са достатъчни че да се намери {\tt iobase} но съм го включил в структурата за улеснение. {\tt struct virtq queues[2]} са двете virtio опашки, структурата за които може да намерите в \{Appendix A\} но за пълнота на тази документация ги представям и тук:
 \begin{lstlisting}[language=C]
 struct virtq_desc {
   uint64_t addr;
@@ -439,7 +439,8 @@ void virtio_queues(struct virtio_device* virtio) {
 Едно virtio-serial устройство без никакви екстри има две опашки - първата е за вход а втората за изход. Първото което правим за всяка опашка е да вземем нейната големина \{2.4.2\}. След това трябва да заделим достатъчно място в паметта за това. Формулата за изчисление на нужното място се намира в \{2.4.2\}. {\tt buf} става пойнтер към това пространство, а {\tt bufPage} е номерът на страницата където се намира пространството. Заделянето на нужната памет става чрез {\tt gimme\_memory} което е нещо подобно на {\tt malloc} но много по-просто. Ето я имплементацията:
 \begin{lstlisting}[language=C]
 #define heap_size 32
-static u8 heap_start[heap_size*4096] __attribute__((aligned(4096)));
+static u8 heap_start[heap_size*4096]
+  __attribute__((aligned(4096)));
 
 u8* gimme_memory(u32 pages) {
   static u32 given_pages = 0;
@@ -458,9 +459,12 @@ u8* gimme_memory(u32 pages) {
 
 Последното което трябва да направим за всяка опашка е да кажем на устройството къде се намира. Въпреки че \{4.1.4.8\} нарича полето ``Queue address'', ние трябва да подадем номерът на първата страница където се намира опашката. Размерът на една страница в нашият случай е 4096 байта но варира.
 
-{\tt virtq\_insert} слага буфер в посочена опашка както е описано в \{3.2.1\}. Ето кодът:
+{\tt virtq\_insert} слага буфер в посочена опашка както е описано в \{3.2.1\}. Ето го и кодът:
 \begin{lstlisting}[language=C]
-void virtq_insert(struct virtio_device* virtio, u32 queue_num, char const* buf, u32 len, u8 flags) {
+void virtq_insert(struct virtio_device* virtio,
+                  u32 queue_num,
+                  char const* buf, u32 len,
+                  u8 flags) {
   u16 iobase = virtio->iobase;
   struct virtq* queue = &virtio->queues[queue_num];
 

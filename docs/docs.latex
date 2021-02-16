@@ -1,9 +1,10 @@
-\documentclass[draft,a4paper,12pt]{article}
+\documentclass[a4paper,12pt]{article} % add 'draft' when debugging
 \usepackage[utf8]{inputenc} % specify there may be unicode in .latex file
+\usepackage[T1,T2A]{fontenc} % specify there may be non-ascii in output
+%\usepackage{lmodern} % different font
+
 \usepackage[english,bulgarian]{babel} % support for bulgarian
-\usepackage{csquotes} % babel wants it for some reason
-\usepackage{lmodern} % different font
-%\usepackage{pxfonts} % different font
+\usepackage[autostyle=false]{csquotes} % babel wants it for some reason
 \usepackage{indentfirst} % indent the first line of paragraph
 \usepackage{nameref} % named references to sections
 \usepackage{graphicx} % for including graphics (images)
