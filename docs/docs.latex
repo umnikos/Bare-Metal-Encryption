@@ -60,7 +60,6 @@
 % table of contents
 \newpage
 \nocite{*} % show all citations even if they weren't cited
-\addcontentsline{toc}{section}{Съдържание}
 \tableofcontents
 
 \end{document}
