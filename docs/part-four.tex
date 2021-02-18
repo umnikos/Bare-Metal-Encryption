@@ -1,5 +1,11 @@
 % usage manual (6-10 pages)
 \section{Ръководство на потребителя}
+\subsection{Сваляне на кода от интернет}
+Кодът е качен в GitHub и може да се свали локално чрез {\tt git}:
+\begin{lstlisting}
+git clone https://github.com/umnikos/Bare-Metal-Encryption.git
+\end{lstlisting}
+
 \subsection{Компилиране на документацията}
 Документацията е написана на \LaTeX{}. Намира се в папка {\tt docs} и най-лесно се компилира със следните команди (за линукс):
 \begin{lstlisting}
@@ -8,6 +14,13 @@ bibtex docs
 pdflatex docs.latex
 pdflatex docs.latex
 \end{lstlisting}
+Ако нямате {\tt pdflatex} или {\tt bibtex} инсталирани то те се инсталират по следния начин (на Debian-базирани линукс дистрибуции):
+\begin{lstlisting}
+sudo apt update
+sudo apt install texlive-latex-base texlive-lang-cyrillic
+sudo apt install texlive-latex-extra biber
+\end{lstlisting}
+Ако получите грешка при компилация е възможно горните команди да я оправят.
 
 \subsection{Компилиране на приложението}
 Различни конфигурации на кода се намират в папка {\tt builds}. Пример (за линукс):
@@ -16,5 +29,53 @@ cd docs/bare-metal-encryption
 make main-serial
 make run-serial
 \end{lstlisting}
-Последната команда е за изпълняване на кода чрез QEMU. За компилация е нужно да имате инсталиран i686 C cross-compiler.\footnote{Ако не ви се занимава да компилирате gcc като cross-compiler може да използвате {\tt zig cc -target i386-freestanding} като C компилатор, но не успях да постигна успех при свързването на изпълнимия файл по този начин.}
+Последната команда е за изпълняване на кода чрез QEMU. QEMU се инсталира по следния начин (за Debian-базирани линукс дистрибуции):
+\begin{lstlisting}
+sudo apt update
+sudo apt install qemu-system-x86
+\end{lstlisting}
+
+За компилация е нужно да имате инсталиран i686 C cross-compiler.\footnote{Експериментирах с {\tt zig cc -target i386-freestanding} като C компилатор, но не успях да постигна успех при свързването на изпълнимия файл.} Такъв компилатор не се предлага в {\tt apt} а трябва да се компилира от сорс. За тази цел са нужни няколко програми които се инсталират със следните команди (за Debian-базирани линукс дистрибуции):
+\begin{lstlisting}
+sudo apt update
+sudo apt install build-essential bison flex libgmp3-dev
+sudo apt install libmpc-dev libmpfr-dev texinfo
+\end{lstlisting}
+Сорс кодовете може да изтеглите от https://ftp.gnu.org/gnu/gcc/ и https://ftp.gnu.org/gnu/binutils/ като {\tt .tar.gz} файлове.
+
+След като свалите кода на {\tt gcc} и {\tt binutils} следва да ги компилираме:
+\begin{lstlisting}
+export PREFIX="$HOME/opt/cross"
+export PATH="$PREFIX/bin:$PATH"
+export TARGET=i686-elf
+
+cd ~/Downloads
+tar zxf gcc-10.2.0.tar.gz
+tar zxf binutils-2.36.tar.gz
+
+mkdir build-binutils
+cd build-binutils
+../binutils-2.36/configure --target=$TARGET --prefix="$PREFIX" \
+    --with-sysroot --disable-nls --disable-werror
+make
+make install
+
+cd ..
+mkdir build-gcc
+cd build-gcc
+../gcc-10.2.0/configure --target=$TARGET --prefix="$PREFIX" \
+    --disable-nls --enable-languages=c,c++ --without-headers
+make all-gcc
+make all-target-libgcc
+make install-gcc
+make install-target-libgcc
+
+\end{lstlisting}
+
+{\tt TARGET} е мястото където ще се инсталира компилатора и може да бъде променено. Имайте в предвид че компилацията отнема време. Тези команди трябва да се изпълнят в един и същи терминал в този ред.
+
+След рестартиране на терминала ще откриете, че компилатора вече не може да бъде намерен, това е защото първите две команди са временни. Проблемът се оправя като ги добавите в края на {\tt \~{}/.bashrc} файла за да се изпълняват при всяко отваряне на терминала.
+
+
+
 
