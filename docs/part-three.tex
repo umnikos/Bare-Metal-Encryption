@@ -209,8 +209,8 @@ idt_handler2:
 \end{lstlisting}
 {\tt idt\_handler1} и {\tt idt\_handler2} при извикването им сигнализират на PIC контролерите че прекъсването е приключило. Без да се направи това прекъсването ще продължи вечно и процесора никога няма да получи следващо прекъсване. {\tt idt\_handler0} е за останалите прекъсвания които не очакваме и ако дойдат спира процесора.
 
-\subsubsection{Задачите на {\tt kernel\_main}} % FIXME - NOT TRUE NOW
-{\tt kernel\_main} единствено извиква {\tt virtio\_init} което търси и намира virtio-serial устройството и го инициализира и след това да извика {\tt hello\_world} което използва това virtio устройство за да изпрати ``Hello, World!''.
+\subsubsection{Задачите на {\tt kernel\_main}}
+{\tt kernel\_main} прави различни неща в зависимост от това което бихме искали да прави приложението ни, но в общия случай извиква {\tt virtio\_init} за да намери и инициализира virtio-serial устройството и след това извиква друга функция която да върши нещо. Пример с {\tt hello\_world}:
 \begin{lstlisting}[language=C]
 void kernel_main() {
   struct virtio_device virtio;
@@ -506,7 +506,7 @@ void virtq_insert(struct virtio_device* virtio,
 % TODO - set_irq, virtio_handler_prelude, virtio interrupt handler
 
 \subsubsection{``Hello, World!''}
-{\tt hello\_world} е последната функция която се извиква и има за цел да изпрати ``Hello, World!''. Това се постига като просто се запише във втората опашка. Мисля че кодът сам говори за себе си:
+{\tt hello\_world} е примерна функция и единственото което прави е да изпише ``Hello, World!''. Това се постига като запише съобщението във втората опашка:
 \begin{lstlisting}[language=C]
 void hello_world(struct virtio_device* virtio) {
   const u32 msglen = 16;
