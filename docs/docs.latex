@@ -28,9 +28,9 @@
 \emergencystretch=1em % fix overfull hboxes by just making those lines ugly
 
 % shrink page margins
-\addtolength{\oddsidemargin}{-.750in}
-\addtolength{\evensidemargin}{-.875in}
-\addtolength{\textwidth}{1.625in}
+\addtolength{\oddsidemargin}{-.500in}
+\addtolength{\evensidemargin}{-.750in}
+\addtolength{\textwidth}{1.250in}
 \addtolength{\topmargin}{-.5in}
 \addtolength{\textheight}{1.75in}
 
