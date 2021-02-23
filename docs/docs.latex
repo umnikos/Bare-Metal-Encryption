@@ -1,4 +1,4 @@
-\documentclass[a4paper,12pt]{article} % add 'draft' when debugging
+\documentclass[a4paper,12pt]{report} % add 'draft' when debugging
 \usepackage[utf8]{inputenc} % specify there may be unicode in .latex file
 \usepackage[T1,T2A]{fontenc} % specify there may be non-ascii in output
 %\usepackage{lmodern} % different font
@@ -54,7 +54,7 @@
 
 % citations (unbounded)
 \newpage
-\addcontentsline{toc}{section}{Литература}
+\addcontentsline{toc}{chapter}{Литература}
 \printbibliography
 
 % table of contents
