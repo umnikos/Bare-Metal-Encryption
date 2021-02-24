@@ -35,9 +35,9 @@
 \addtolength{\textheight}{1.75in}
 
 % \section-specific styling
-\sectionfont{\fontsize{22}{24}\selectfont}
-\subsectionfont{\fontsize{20}{22}\selectfont}
-\subsubsectionfont{\fontsize{18}{20}\selectfont}
+% \sectionfont{\fontsize{22}{24}\selectfont}
+% \subsectionfont{\fontsize{20}{22}\selectfont}
+% \subsubsectionfont{\fontsize{18}{20}\selectfont}
 
 \begin{document}
 
