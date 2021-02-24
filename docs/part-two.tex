@@ -38,5 +38,33 @@
 
   \subsection{Алгоритъм за бързо експониране на големи числа (бинарно експониране)}
 
+\begin{figure}[p]
+\caption{Имплементация на бинарно експониране}
+\begin{lstlisting}[language=C]
+void exponentiation(ii* b_in, ii* e_in, ii* res) {
+  inii(b); // b = b_in
+  inii(e); // e = e_in
+
+  mkii(temp); // ii temp
+  ii one; bignum_from_int(&one, 1);
+
+  bignum_from_int(res, 1); // res = 1
+  while (!bignum_is_zero(e)) { // while (e != 0) {
+    if (e->array[0]&1) { // if (e & 1) {
+      // res *= b
+      bignum_mul(res, b, temp);
+      bignum_assign(res, temp);
+    }
+    // b *= b
+    bignum_mul(b, b, temp);
+    bignum_assign(b, temp);
+    // e = e >> 1
+    bignum_rshift(e, temp, 1);
+    bignum_assign(e, temp);
+  }
+}
+\end{lstlisting}
+\end{figure}
+
   \subsection{Алгоритъм за бързо умножение на големи числа (алгоритъма на Карацуба)} \label{karatsuba}
 
