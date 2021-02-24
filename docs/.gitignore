@@ -4,3 +4,4 @@
 !*.tex
 !*.bib
 docs-blx.bib
+!*.latexmain
