@@ -54,7 +54,7 @@
 
 % citations (unbounded)
 \newpage
-\addcontentsline{toc}{chapter}{Литература}
+\addcontentsline{toc}{chapter}{Библиография}
 \printbibliography
 
 % table of contents
