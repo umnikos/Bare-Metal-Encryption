@@ -19,7 +19,7 @@
 \usepackage{amsmath} % math alignment stuff
 
 % make table numbers depend on section number
-\counterwithin{table}{section}
+%\counterwithin{table}{section}
 %\counterwithin{table}{subsection}
 %\counterwithin{table}{subsubsection}
 
