@@ -1,10 +1,30 @@
 % usage manual (6-10 pages)
 \chapter{Ръководство на потребителя}
   \section{Сваляне на кода от интернет}
+  Кодът на приложението и документацията е качен в GitHub и може да се свали локално чрез {\tt git}:
+  \begin{lstlisting}
+  git clone --recurse-submodules \
+      https://github.com/umnikos/Bare-Metal-Encryption.git
+  \end{lstlisting}
 
   \section{Компилиране на документацията}
+  Документацията е написана на \LaTeX{}. Намира се в папка {\tt docs} и най-лесно се компилира със следните команди (за Linux):
+  \begin{lstlisting}
+  pdflatex docs.latex
+  bibtex docs
+  pdflatex docs.latex
+  pdflatex docs.latex
+  \end{lstlisting}
+  Ако на машината липсват {\tt pdflatex} или {\tt bibtex} или се получават грешки при компилация то трябва да се инсталират всички нужни \LaTeX{} пакети. Инсталацията става по следният начин (за Debian-базирани Linux дистрибуции):
+  \begin{lstlisting}
+  sudo apt update
+  sudo apt install texlive-latex-base texlive-lang-cyrillic
+  sudo apt install texlive-latex-extra biber
+  \end{lstlisting}
 
   \section{Компилиране на приложението}
+  % TODO
 
   \section{Начин на ползване}
   % PICTURES
+  % TODO
