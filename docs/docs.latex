@@ -13,7 +13,7 @@
 \usepackage[backend=bibtex,sorting=none]{biblatex} % for bibliography and citations
 \usepackage[final]{listings} % for inserting code
 \usepackage{minted} % good code highlighting
-\usepackage[gray]{xcolor} % for colored text; add/remove [gray] depending of if output should be grayscale or not
+\usepackage{xcolor} % for colored text; add/remove [gray] depending of if output should be grayscale or not
 \usepackage{chngcntr} % to make table numbers include section numbers
 \usepackage[perpage]{footmisc} % footnote counter resets at 1 each page
 \usepackage{amsmath} % math alignment stuff
@@ -23,8 +23,10 @@
 %\counterwithin{table}{subsection}
 %\counterwithin{table}{subsubsection}
 
-% default code color theme
+% default configs for minted
+\setminted{linenos}
 %\usemintedstyle{algol}
+\usemintedstyle{default}
 
 \addbibresource{refs} % specify file with references
 
