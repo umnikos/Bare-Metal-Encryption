@@ -12,8 +12,8 @@
 \usepackage{sectsty} % for changing font size only for sections
 \usepackage[backend=bibtex,sorting=none]{biblatex} % for bibliography and citations
 \usepackage[final]{listings} % for inserting code
-%\usepackage{color} % color for code
-\usepackage{xcolor} % for colored text
+\usepackage{minted} % good code highlighting
+\usepackage[gray]{xcolor} % for colored text; add/remove [gray] depending of if output should be grayscale or not
 \usepackage{chngcntr} % to make table numbers include section numbers
 \usepackage[perpage]{footmisc} % footnote counter resets at 1 each page
 \usepackage{amsmath} % math alignment stuff
@@ -22,6 +22,9 @@
 %\counterwithin{table}{section}
 %\counterwithin{table}{subsection}
 %\counterwithin{table}{subsubsection}
+
+% default code color theme
+%\usemintedstyle{algol}
 
 \addbibresource{refs} % specify file with references
 
