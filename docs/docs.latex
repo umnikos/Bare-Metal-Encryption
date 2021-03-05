@@ -11,12 +11,13 @@
 \usepackage{geometry} % for changing page dimensions and header space
 \usepackage{sectsty} % for changing font size only for sections
 \usepackage[backend=bibtex,sorting=none]{biblatex} % for bibliography and citations
-\usepackage[final]{listings} % for inserting code
+%\usepackage[final]{listings} % for inserting code
 \usepackage{minted} % good code highlighting
 \usepackage{xcolor} % for colored text; add/remove [gray] depending of if output should be grayscale or not
 \usepackage{chngcntr} % to make table numbers include section numbers
 \usepackage[perpage]{footmisc} % footnote counter resets at 1 each page
 \usepackage{amsmath} % math alignment stuff
+\usepackage{lstfiracode} % for changing fonts
 
 % make table numbers depend on section number
 %\counterwithin{table}{section}
@@ -24,9 +25,11 @@
 %\counterwithin{table}{subsubsection}
 
 % default configs for minted
-\setminted{linenos}
+\definecolor{bggray}{rgb}{0.95,0.95,0.95}
+\definecolor{bgyellow}{rgb}{1,1,0.90}
+\setminted{linenos,bgcolor=bgyellow,frame=lines,framesep=2mm,breaklines,autogobble}
 %\usemintedstyle{algol}
-\usemintedstyle{default}
+%\usemintedstyle{bw}
 
 \addbibresource{refs} % specify file with references
 
