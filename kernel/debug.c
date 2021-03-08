@@ -106,7 +106,6 @@ void terminal_write(const char* data, size_t size)
 
 void debug(const char* data) 
 {
-	fibonacci(25);
 	terminal_write(data, strlen(data));
 }
 

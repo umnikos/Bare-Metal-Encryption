@@ -1,8 +1,5 @@
 section .text
 
-extern fibonacci
-fibonacci_delay equ 10
-
 global nothing
 nothing:        ret                             ; for debugging purposes
 
@@ -11,9 +8,6 @@ out_byte:
                 mov dx, word [esp+4]
                 mov al, byte [esp+8]
                 out dx, al
-                push fibonacci_delay
-                call fibonacci
-                add esp, 4
                 ret
 
 global out_word                                 ; out_byte(uint16_t port, uint16_t data)
@@ -21,9 +15,6 @@ out_word:
                 mov dx, word [esp+4]
                 mov ax, word [esp+8]
                 out dx, ax
-                push fibonacci_delay
-                call fibonacci
-                add esp, 4
                 ret
 
 global out_dword                                ; out_byte(uint16_t port, uint32_t data)
@@ -31,9 +22,6 @@ out_dword:
                 mov dx, word [esp+4]
                 mov eax, dword [esp+8]
                 out dx, eax
-                push fibonacci_delay
-                call fibonacci
-                add esp, 4
                 ret
 
 global in_byte                                  ; uint8_t in_byte(uint16_t port)

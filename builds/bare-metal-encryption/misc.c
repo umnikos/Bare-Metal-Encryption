@@ -58,7 +58,6 @@ i get_time() {
   // https://wiki.osdev.org/CMOS#The_Real-Time_Clock
   // FIXME - make it not just return seconds, lol
   out_byte(0x70, 0x80 | 0x00);
-  fibonacci(10);
   i seconds = in_byte(0x71);
   return (seconds << 17) + 17;
 }
