@@ -211,6 +211,35 @@
 
 \section{Реализация на virtio-serial драйвер}
   \subsection{Търсене на Virtio устройство по PCI}
+  Всички Virtio устройства имат един и същи номер на производител (0x1AF4), докато номерът на устройството (по-точно за старите virtio устройства) е между 0x1000 и 0x103F. Фигура \ref{fig:finding-virtio} показва прост алгоритъм за итериране през всички PCI устройства (идентифицирани чрез двойката числа {\tt bus} и {\tt device}) и проверяване дали е Virtio устройство. Това не е най-бързият метод, но е най-простият и работи достатъчно ефективно.
+
+  След като бъде намерено устройството по PCI е добра идея да бъде запазена двойката числа {\tt bus} и {\tt device} за да не трябва устройството да бъде търсено отново. Чрез тези две числа може да бъде взет портът му за комуникация през {\tt in/out} инструкциите (числото {\tt iobase} във фигурата) с Virtio устройството, както и номерът на хардуерното прекъсване, което предизвиква.
+
+  \begin{figure}[ht]
+    \centering
+    \begin{minted}{C}
+      void pci_find_virtio(struct virtio_device* result) {
+        for(u32 bus=0; bus<256; bus++) {
+          for(u32 device=0; device<32; device++) {
+            u16 deviceid = pci_read_deviceid(bus, device);
+            if (deviceid >= 0x1000 &&
+                deviceid <= 0x103F && // search only for old virtio devices
+                pci_read_vendor(bus,device) == 0x1AF4) {
+              result->bus = bus;
+              result->device = device;
+              result->iobase = pci_read_bar(bus, device, 0) & 0xFFFC;
+              return;
+            }
+          }
+        }
+        crash("NO VIRTIO DEVICE FOUND");
+      }
+    \end{minted}
+    \caption{Търсене на Virtio устройство по PCI}
+    \label{fig:finding-virtio}
+  \end{figure}
+
+  \subsection{Инициализиране на Virtio устройство}
   % TODO
 
   \subsection{Договаряне с Virtio устройство}
