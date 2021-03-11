@@ -88,19 +88,139 @@
   \end{figure}
 
   \subsection{Създаване на GDT таблица}
+  В паметта трябва да се заделят две неща. Първото е самата таблица, където всеки ред е широк 8 байта и съдържа информация за сегмента, включително къде започва, къде свършва и от кой тип е. Фигура \ref{fig:gdt} показва GDT таблица със само един сегмент за код и един сегмент за данни, като и двата сегмента са за код с ниво на привилегия 0 (други нива не са използвани в проекта). Второто, което трябва да се задели, е 6-байтов дескриптор, оказващ размера на таблицата (2 байта) и адресът към нея (4 байта). Фигура \ref{fig:gdtr} го показва.
+
+  \begin{figure}[ht]
+    \centering
+    \begin{minted}{nasm}
+      gdt:
+          ; null segment (0x00) (left empty)
+          dw 0 ; limit 0-15
+          dw 0 ; base 0-15
+          db 0 ; base 16-23
+          db 0 ; type
+          db 0 ; limit 16-19 | flags
+          db 0 ; base 24-31
+
+          ; code segment (0x08)
+          dw 0xFFFF
+          dw 0
+          db 0
+          db 0x9A
+          db 0xCF
+          db 0
+
+          ; data segment (0x10)
+          dw 0xFFFF
+          dw 0
+          db 0
+          db 0x92
+          db 0xCF
+          db 0
+      gdt_end:
+    \end{minted}
+    \caption{GDT таблица в паметта}
+    \label{fig:gdt}
+  \end{figure}
+  \begin{figure}[ht]
+    \centering
+    \begin{minted}{nasm}
+      gdtr:
+          dw gdt_end-gdt-1
+          dd gdt
+    \end{minted}
+    \caption{Дескриптор към GDT таблица}
+    \label{fig:gdtr}
+  \end{figure}
+
+  Зареждането на таблицата (което се прави за да има ефект таблицата) е показано на фигура \ref{fig:lgdt} и става чрез {\tt lgdt} инструкцията като се подава като аргумент адресът на дескриптора. След {\tt lgdt} инструкцията таблицата все още няма ефект докато не се презапишат сегментните регистри. В защитен решим всеки сегментен регистър представлява 16 бита, които индексират ред в GDT таблицата. Най-младшите 3 бита са за нивото на привилегия и дали се използва GDT или LDT таблицата (за LDT таблицата не се говори в тази документация). Останалите 13 бита са индекс в GDT (или LDT) таблицата. За сегмента за кода индексът в таблицата е 1 и следователно в регистър {\tt cs} трябва да се зареди стойността 0x08 (00000100 в бинарна бройна система). Аналогично за сегмента на данните, чиито индекс в таблицата е 2, регистрите {\tt ds}, {\tt es}, {\tt fs}, {\tt gs} и {\tt ss} трябва да получат стойността 0x10 (00010000 в бинарна бройна система). Сегментните регистри за данни лесно се променят чрез {\tt mov} инструкцията за преместване на данни, но {\tt mov} не работи за {\tt cs} регистъра. Той може да се промени само с далечен {\tt jmp}.
+
+    \begin{figure}[ht]
+      \centering
+      \begin{minted}{nasm}
+        section .text
+        global init_gdt
+
+        init_gdt:
+            lgdt [gdtr]
+            jmp 0x08:.reload_cs
+          .reload_cs:
+            mov ax, 0x10
+            mov ds, ax
+            mov es, ax
+            mov fs, ax
+            mov gs, ax
+            mov ss, ax
+            ret
+      \end{minted}
+      \caption{Зареждане на GDT таблицата}
+      \label{fig:lgdt}
+    \end{figure}
 
   \subsection{Създаване на IDT таблица}
+  IDT таблицата се създава по подобен начин като GDT таблицата. Тя ще бъде пълна с много повече редове (до 256) и за това може да се спори, че е по-лесна за попълване през {\tt C}. Таблицата се пълни с адресите на процедури, като функциите трябва вместо с {\tt ret} да приключват с {\tt iret}. Прекъсванията между 0x20 и 0x27 ще бъдат хардуерните прекъсвания на майстор (``master'') PIC чипа и процедурите също така трябва да го уведомят при приключването на прекъсването. Прекъсванията между 0x28 и 0x2F принадлежат на чиракът (``slave'') PIC чип и трябва да го уведомят, както и да уведомят майстор PIC чипа. Последните 2 вида процедури са показани на фигура \ref{fig:irqhandlers}
+
+  \begin{figure}[ht]
+    \centering
+    \begin{minted}{nasm}
+      section .text
+      global idt_handler1
+      global idt_handler2
+
+      idt_handler1:
+          pushad
+          ; code goes here
+          mov al, 0x20
+          out 0x20, al
+          popad
+          iret
+
+      idt_handler2:
+          pushad
+          ; code goes here
+          mov al, 0x20
+          out 0xA0, al
+          out 0x20, al
+          popad
+          iret
+    \end{minted}
+    \caption{Празни процедури за отговаряне на хардуерните прекъсвания}
+    \label{fig:irqhandlers}
+  \end{figure}
+
+  Конфигурацията на PIC чиповете е показана във фигура \ref{fig:picconfig} ({\tt out\_byte} е функция, която опакова инструкцията {\tt out} за да може да се използва през {\tt C}). След като се конфигурират идва ред на това да се попълни IDT таблицата, да се направи дескриптор и да се зареди чрез {\tt LIDT}, което става аналогично на {\tt GDT} таблицата.
+
+  \begin{figure}[ht]
+    \centering
+    \begin{minted}{C}
+      out_byte(0x20, 0x11); // start initialization sequence
+      out_byte(0xA0, 0x11);
+
+      out_byte(0x21, 0x20); // master PIC offset 0x20
+      out_byte(0xA1, 0x28); // slave PIC offset 0x28 (0x20+8)
+      out_byte(0x21, 0x04); // tell master to cascade to slave through IRQ2
+      out_byte(0xA1, 0x02); // tell slave its cascade identity
+      out_byte(0x21, 0x01); // 8086 mode
+      out_byte(0xA1, 0x01);
+      out_byte(0x21, 0); // set masks to 0 (all interrupts enabled)
+      out_byte(0xA1, 0);
+    \end{minted}
+    \caption{Конфигурация на PIC чиповете}
+    \label{fig:picconfig}
+  \end{figure}
 
 \section{Реализация на virtio-serial драйвер}
-  \subsection{Стари и преходни Virtio устройства и драйвери}
-
   \subsection{Търсене на Virtio устройство по PCI}
+  % TODO
 
   \subsection{Договаряне с Virtio устройство}
+  % TODO
 
   \subsection{Създаване на virtqueue опашките}
+  % TODO
 
   \subsection{Конфигуриране на Virtio устройство}
+  % TODO
 
 \section{Реализация на RSA}
   \subsection{Източник на случайност}
