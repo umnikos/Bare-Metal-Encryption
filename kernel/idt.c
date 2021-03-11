@@ -20,7 +20,7 @@ void fill_idt() {
 
   out_byte(0x21, 0x20); // master PIC offset 0x20
   out_byte(0xA1, 0x28); // slave PIC offset 0x28 (0x20+8)
-  out_byte(0x21, 0x04); // tell master to cascane to slave through IRQ2
+  out_byte(0x21, 0x04); // tell master to cascade to slave through IRQ2
   out_byte(0xA1, 0x02); // tell slave its cascade identity
   out_byte(0x21, 0x01); // 8086 mode
   out_byte(0xA1, 0x01);
