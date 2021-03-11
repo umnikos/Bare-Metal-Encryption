@@ -12,15 +12,15 @@
   \end{figure}
 
   \section{Компилиране на документацията}
-  Документацията е написана на \LaTeX{}. Намира се в папка {\tt docs} и най-лесно се компилира с командите във фигура \ref{fig:latex-compiling}. Ако на машината липсват {\tt pdflatex} или {\tt bibtex} или се получават грешки при компилация то трябва да се инсталират всички нужни \LaTeX{} пакети. Инсталацията става по начинът показан във фигура \ref{fig:latex-requirements}.
-  % FIXME - minted changed the commands and requirements!
+  Документацията е написана на \LaTeX{}. Намира се в папка {\tt docs} и най-лесно се компилира с командите във фигура \ref{fig:latex-compiling}. Ако на машината липсват {\tt pdflatex} или {\tt bibtex} или се получават грешки при компилация то вероятно не са инсталирани всички нужни \LaTeX{} пакети. Инсталацията става по начинът, показан във фигура \ref{fig:latex-requirements}.
+  % FIXME - minted changed the requirements!
   \begin{figure}[ht]
     \centering
     \begin{minted}{bash}
-      $ pdflatex docs.latex
+      $ pdflatex -shell-escape docs.latex
       $ bibtex docs
-      $ pdflatex docs.latex
-      $ pdflatex docs.latex
+      $ pdflatex -shell-escape docs.latex
+      $ pdflatex -shell-escape docs.latex
     \end{minted}
     \caption{Компилиране на документацията (за Linux)}
     \label{fig:latex-compiling}
