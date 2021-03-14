@@ -240,16 +240,84 @@
   \end{figure}
 
   \subsection{Инициализиране на Virtio устройство}
-  % TODO
+  Инициализацията става както е описана в точка \ref{virtioinit} с изключенията, че стъпки 5 и 6 се пропускат при старите устройства и че стъпка 1 не е нужна (при стартиране на компютъра устройството започва рестартирано).
+
+  Virtio-serial реално е имплементирано като Virtio-console устройство (като голямата разлика е, че virtio-serial не поддържа размер на терминала) и за това не е описано във Virtio документацията като отделно устройство и не е имплементирано като такова (номерът на вида на устройството е $3$, което също е номерът за virtio-console устройства)
 
   \subsection{Договаряне с Virtio устройство}
-  % TODO
+  Списъкът от допълнителни функции, които поддържа едно устройство, е представен в паметта като 32-битово число, като всеки бит отговаря на една функция. Битмаска върху числото изключва всички функции (като по подразбиране е добре да бъдат изключени всички функции, които не се поддържат или все още не съществуват по времето на разработката на драйвера). Фигура \ref{fig:disabling-all-features} показва как става това, като във фигурата всички функции се изключват.
+
+  \begin{figure}[ht]
+    \centering
+    \begin{minted}{C}
+      u32 supported_features = in_dword(iobase+0x00);
+      supported_features &= 0x00000000;
+      out_dword(iobase+0x04, supported_features);
+    \end{minted}
+    \caption{Договаряне на фунцкии с Virtio устройство}
+    \label{fig:disabling-all-features}
+  \end{figure}
 
   \subsection{Създаване на virtqueue опашките}
-  % TODO
+  Създаването на virtqueue опашките става по различен начин за старите и новите устройства. В тази документация е описан само начина за старите.
 
-  \subsection{Конфигуриране на Virtio устройство}
-  % TODO
+  Всяка опашка има размер определен от устройството и е степен на двойката. Размерът не е броят байтове, които ще заема цялата структура, а броят дескриптори. Фигура \ref{fig:getting-virtqueue-size} показва как се взима размерът от устройството (където {\tt q\_addr} е номерът на опашката), а фигура \ref{fig:calculating-virtqueue-size} показва как се изчислява размерът в паметта в брой страници (1 страница = 4096 байта). След като това се изчисли, нужното количество памет трябва да се задели, като след това не е нужно да се нулира цялата структура, а само да се инициализират няколко променливи. Фигура \ref{fig:preparing-virtqueue} показва този процес. Накрая трябва да се съобщи на virtio устройството къде в паметта се намира опашката, което става чрез две {\tt out} инструкции както е показвано във фигура \ref{fig:giving-virtqueue}.
+
+  \begin{figure}[ht]
+    \centering
+    \begin{minted}{C}
+      out_word(iobase+0x0E,q_addr);
+      u16 q_size = in_word(iobase+0x0C);
+    \end{minted}
+    \caption{Взимане на размера на virtqueue от Virtio устройство}
+    \label{fig:getting-virtqueue-size}
+  \end{figure}
+
+  \begin{figure}[ht]
+    \centering
+    \begin{minted}{C}
+      u32 sizeofBuffers = (sizeof(struct virtq_desc)*q_size);
+      u32 sizeofQueueAvailable = (sizeof(u16)*(3+q_size));
+      u32 sizeofQueueUsed = (sizeof(u16)*3 + sizeof(struct virtq_used_elem)*q_size);
+      #define page_count(bytes) ((bytes+0x0FFF)>>12)
+      u32 firstPageCount = page_count(sizeofBuffers + sizeofQueueAvailable);
+      u32 secondPageCount = page_count(sizeofQueueUsed);
+      u32 queuePageCount = firstPageCount+secondPageCount;
+    \end{minted}
+    \caption{Изчисляване на количеството памет, което е нужно за virtqueue опашка}
+    \label{fig:calculating-virtqueue-size}
+  \end{figure}
+
+  \begin{figure}[ht]
+    \centering
+    \begin{minted}{C}
+      u8* buf = gimme_memory(queuePageCount);
+      u32 bufPage = (uptr)buf >> 12;
+
+      struct virtq* vq = &virtio->queues[q_addr];
+      vq->qsize = q_size;
+      vq->desc = (struct virtq_desc*)buf;
+      vq->avail = (struct virtq_avail*)(buf+sizeofBuffers);
+      vq->used = (struct virtq_used*)(buf+(firstPageCount<<12));
+
+      vq->avail->idx = 0;
+      vq->avail->flags = 0; // 1 if we don't want interrupts, 0 otherwise
+      vq->used->idx = 0;
+      vq->used->flags = 0;
+    \end{minted}
+    \caption{Създаване на virtqueue в паметта}
+    \label{fig:preparing-virtqueue}
+  \end{figure}
+
+  \begin{figure}[ht]
+    \centering
+    \begin{minted}{C}
+      out_word(iobase+0x0E,q_addr);
+      out_dword(iobase+0x08,bufPage);
+    \end{minted}
+    \caption{Съобщаване на Virtio за адресът на virtqueue}
+    \label{fig:giving-virtqueue}
+  \end{figure}
 
 \section{Реализация на RSA}
   \subsection{Източник на случайност}
