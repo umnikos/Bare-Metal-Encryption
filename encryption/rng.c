@@ -1,5 +1,7 @@
 #include "prelude.h"
 
+#define SHOW_GENERATION() 0
+
 // https://www.freecodecamp.org/news/random-number-generator/
 
 i seed;
@@ -12,6 +14,7 @@ void init_rng() {
   seed = millis * timestamp;
 
   // print debug info
+#if SHOW_GENERATION()
   char buf[64];
   write_out("timestamp: ");
   i_to_str(timestamp, buf, 64);
@@ -25,6 +28,7 @@ void init_rng() {
   i_to_str(seed, buf, 64);
   write_out(buf);
   write_out("\n");
+#endif
 }
 
 // https://en.wikipedia.org/wiki/Xorshift#Example_implementation
