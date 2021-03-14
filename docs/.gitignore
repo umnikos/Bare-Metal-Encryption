@@ -5,4 +5,5 @@
 !*.bib
 docs-blx.bib
 !*.latexmain
-images/
+!images
+!images/*
