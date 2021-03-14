@@ -2,7 +2,7 @@
 \chapter{Ръководство на потребителя}
   \section{Сваляне на кода от интернет}
   Кодът на приложението и документацията е качен в GitHub и може да се свали локално чрез {\tt git} с командата показана във фигура \ref{fig:repo-download}.
-  \begin{figure}[ht]
+  \begin{figure}[htpb]
     \centering
     \begin{minted}{bash}
       $ git clone --recurse-submodules https://github.com/umnikos/Bare-Metal-Encryption.git
@@ -14,7 +14,7 @@
   \section{Компилиране на документацията}
   Документацията е написана на \LaTeX{}. Намира се в папка {\tt docs} и най-лесно се компилира с командите във фигура \ref{fig:latex-compiling}. Ако на машината липсват {\tt pdflatex} или {\tt bibtex} или се получават грешки при компилация то вероятно не са инсталирани всички нужни \LaTeX{} пакети. Инсталацията става по начинът, показан във фигура \ref{fig:latex-requirements}.
   % FIXME - minted changed the requirements!
-  \begin{figure}[ht]
+  \begin{figure}[htpb]
     \centering
     \begin{minted}{bash}
       $ pdflatex -shell-escape docs.latex
@@ -25,7 +25,7 @@
     \caption{Компилиране на документацията (за Linux)}
     \label{fig:latex-compiling}
   \end{figure}
-  \begin{figure}[ht]
+  \begin{figure}[htpb]
     \centering
     \begin{minted}{bash}
       $ sudo apt update
@@ -38,7 +38,7 @@
   \section{Компилиране на приложението}
   Различни конфигурации на кода се намират в папка {\tt builds}. Пример за това как се компилира и изпълнява една от възможните конфигурации е даден във фигура \ref{fig:build-making}. Втората команда е за компилиране на кода, а третата команда е за изпълняване на кода чрез QEMU. QEMU се инсталира по начинът, показан във фигура \ref{fig:installing-qemu}.
 
-  \begin{figure}[ht]
+  \begin{figure}[htpb]
     \centering
     \begin{minted}{bash}
       $ cd docs/bare-metal-encryption
@@ -49,7 +49,7 @@
     \label{fig:build-making}
   \end{figure}
 
-  \begin{figure}[ht]
+  \begin{figure}[htpb]
     \centering
     \begin{minted}{bash}
       $ sudo apt update
@@ -61,7 +61,7 @@
 
   За компилация е нужно да има инсталиран i686 C cross-compiler. Такъв компилатор не се предлага в {\tt apt} вече компилиран, а трябва да се компилира от сорс. За тази цел са нужни няколко програми, които се инсталират с командите, показани във фигура \ref{fig:gcc-requirements}.
 
-  \begin{figure}[ht]
+  \begin{figure}[htpb]
     \centering
     \begin{minted}{bash}
       $ sudo apt update
@@ -75,7 +75,7 @@
   {\tt TARGET} е мястото, където ще се инсталира компилатора и може да бъде променено. Тези команди трябва да се изпълнят в един и същи терминал в този ред.
   Трябва да се има предвид, че този процес може да отнеме време.
 
-  \begin{figure}[ht]
+  \begin{figure}[htpb]
     \centering
     \begin{minted}{bash}
       $ export PREFIX="$HOME/opt/cross"
@@ -107,7 +107,7 @@
 
   Ако инсталацията е успешна трябва да бъде направена перманентна като се добави пътят към компилатора в {\tt \$PATH} променливата за постоянно. Това става като се редактира {\tt \~{}/.bashrc} файла. Фигура \ref{fig:adding-to-path} показва един от възможните начини това да се направи.
 
-  \begin{figure}[ht]
+  \begin{figure}[htpb]
     \centering
     \begin{minted}{bash}
       $ echo 'export PATH="'$PREFIX'/bin:$PATH"' >> testfile.txt
@@ -117,5 +117,19 @@
   \end{figure}
 
   \section{Начин на ползване}
-  % PICTURES
-  % TODO
+  След командата {\tt make run-serial} би трябвало да се появи нов прозорец който изглежда като този във фигура \ref{fig:qemu-window}. След натискането на {\tt Enter} клавиша от клавиатурата прозорецът ще стане чисто черен, но терминалът, от който е стартиран приложението, вече ще се е променил и ще изглежда като във фигура \ref{fig:interface-initial}.
+
+  \begin{figure}[htpb]
+    \centering
+    \includegraphics[width=\textwidth]{qemu-window}
+    \caption{Прозорецът, създаден от QEMU}
+    \label{fig:qemu-window}
+  \end{figure}
+
+  \begin{figure}[htpb]
+    \centering
+    \includegraphics[width=\textwidth]{interface-initial}
+    \caption{Първоначалното състояние на потребителския интерфейс}
+    \label{fig:interface-initial}
+  \end{figure}
+
