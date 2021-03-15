@@ -74,14 +74,14 @@
 
 \fontsize{14pt}{20}\selectfont % change font to 14pt
 
-\include{title-page}
-\include{blank-page}
-\include{intro}
-\include{part-one}
-\include{part-two}
-\include{part-three}
-\include{part-four}
-\include{conclusion}
+\input{title-page}
+\input{blank-page}
+\input{intro}
+\input{part-one}
+\input{part-two}
+\input{part-three}
+\input{part-four}
+\input{conclusion}
 
 % citations (unbounded)
 \newpage
