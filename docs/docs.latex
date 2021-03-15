@@ -90,7 +90,7 @@
 
 % table of contents
 \newpage
-\nocite{*} % show all citations even if they weren't cited
+%\nocite{*} % show all citations even if they weren't cited
 \tableofcontents
 
 \end{document}
