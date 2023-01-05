@@ -8,13 +8,15 @@ OPTIMIZATION_LEVEL=-O2
 COMPILE = $(CC) -g -std=gnu99 -ffreestanding -DBN_NO_ASSERT -DBN_NO_STDIO $(OPTIMIZATION_LEVEL) -Wall -Wextra -Werror -Wconversion -Wno-unused-parameter -c
 ASSEMBLE = $(AS) -g -f elf32 -Wall -Werror
 
+all: main-serial run-serial;
+
 main: clean main.c.o build;
 main-serial: clean main-serial.c.o build;
 hello: clean hello.c.o build;
 main-vga: clean main-vga.c.o build;
 serial-test: clean serial-test.c.o build;
 
-build: myos.iso;
+build: myos.bin;
 
 myos.iso: myos.bin
 	if test -d isodir; then rm -r isodir; fi
@@ -55,7 +57,7 @@ myos.bin: $(asmfiles) $(cfiles) $(hfiles)
 
 
 VIRTIOSTUFF=-device virtio-serial -chardev socket,path=/tmp/foo,server,nowait,id=foo -device virtserialport,chardev=foo,name=org.fedoraproject.port.0
-qemu = qemu-system-i386 -accel kvm -D ./qemu.log -s $(VIRTIOSTUFF) -cdrom myos.iso
+qemu = qemu-system-i386 -accel kvm -D ./qemu.log -s $(VIRTIOSTUFF) -kernel myos.bin
 socat = socat /tmp/foo -
 # could not get radare2 to break at a breakpoint
 # r2 -b32 -e dbg.hwbp=false -e asm.bits=32 -e bin.baddr=0x00100000 -e dbg.exe.path=myos.bin -d gdb://localhost:1234
