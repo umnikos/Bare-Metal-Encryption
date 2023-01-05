@@ -62,18 +62,18 @@ socat = socat /tmp/foo -
 # could not get radare2 to break at a breakpoint
 # r2 -b32 -e dbg.hwbp=false -e asm.bits=32 -e bin.baddr=0x00100000 -e dbg.exe.path=myos.bin -d gdb://localhost:1234
 debugger = cat <(echo -e "target remote localhost:1234") - | gdb myos.bin
-runqemu: myos.iso
+runqemu: build
 	$(qemu)
 
-run: myos.iso
+run: build
 	$(qemu) &
 	sleep 1
 	$(socat)
 
-run-serial: myos.iso
+run-serial: build
 	$(qemu) -serial stdio
 
-debug: myos.iso
+debug: build
 	$(qemu) &
 	sleep 1
 	$(socat) &
